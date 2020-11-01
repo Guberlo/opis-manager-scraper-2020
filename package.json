@@ -1,0 +1,16 @@
+{
+  "name": "opis-manager-scraper",
+  "version": "1.0.0",
+  "description": "scraper for opis manager",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Guberlo",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.21.0",
+    "cheerio": "^1.0.0-rc.3",
+    "lodash": "^4.17.20"
+  }
+}
