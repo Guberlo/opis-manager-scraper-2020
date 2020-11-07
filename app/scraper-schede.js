@@ -32,14 +32,14 @@ const GRAPH_TYPE = {
 // IMPLEMENT TABLE NON FREQ, TABLE FOR REASONS, TABLE FOR SUGGETIONS FREQ AND NOT FREQ
 
 const extractSchedeStats = $ => {
-    var num_schede_f = $(NUM_SCHEDE_F_SELECTOR)
-    var fuoricorso_f = $(FUORICORSO_F_SELECTOR)
+    const num_schede_f = $(NUM_SCHEDE_F_SELECTOR)
+    const fuoricorso_f = $(FUORICORSO_F_SELECTOR)
 
-    var num_schede_nf = $(NUM_SCHEDE_NF_SELECTOR)
-    var fuoricorso_nf = $(FUORICORSO_NF_SELECTOR)
+    const num_schede_nf = $(NUM_SCHEDE_NF_SELECTOR)
+    const fuoricorso_nf = $(FUORICORSO_NF_SELECTOR)
 
-    var graph_info = extractFromGraphs($)
-    var table_info = extractFromTable($)
+    const graph_info = extractFromGraphs($)
+    const table_info = extractFromTable($)
 }
 
 /**
@@ -47,36 +47,36 @@ const extractSchedeStats = $ => {
  * @param {*} $ 
  */
 const extractFromGraphs = $ => {
-    var graph_stats = []
+    let graph_stats = []
 
-    var age_graph = $(AGE_GRAPH_SELECTOR)
-    var age_stats = getStatsFromSelector(age_graph)
-    var age_dict = UrlToDictionary(AGE_KEYS)(age_stats)
+    const age_graph = $(AGE_GRAPH_SELECTOR)
+    const age_stats = getStatsFromSelector(age_graph)
+    const age_dict = UrlToDictionary(AGE_KEYS)(age_stats)
     graph_stats.push(age_dict)
 
-    var study_time = $(STUDY_TIME_SELECTOR)
-    var study_time_stats = getStatsFromSelector(study_time)
-    var study_dict = UrlToDictionary(STUDY_TIME_KEYS)(study_time_stats)
+    const study_time = $(STUDY_TIME_SELECTOR)
+    const study_time_stats = getStatsFromSelector(study_time)
+    const study_dict = UrlToDictionary(STUDY_TIME_KEYS)(study_time_stats)
     graph_stats.push(study_dict)
 
-    var mean_travel_time = $(MEAN_TRAVEL_TIME_SELECTOR)
-    var mean_travel_time_stats = getStatsFromSelector(mean_travel_time)
-    var mean_travel_dict = UrlToDictionary(TRAVEL_KEYS)(mean_travel_time_stats)
+    const mean_travel_time = $(MEAN_TRAVEL_TIME_SELECTOR)
+    const mean_travel_time_stats = getStatsFromSelector(mean_travel_time)
+    const mean_travel_dict = UrlToDictionary(TRAVEL_KEYS)(mean_travel_time_stats)
     graph_stats.push(mean_travel_dict)
 
-    var total_study_time = $(TOTAL_STUDY_TIME_SELECTOR)
-    var total_study_time_stats = getStatsFromSelector(total_study_time)
-    var total_study_dict = UrlToDictionary(TOTAL_STUDY_KEYS)(total_study_time_stats)
+    const total_study_time = $(TOTAL_STUDY_TIME_SELECTOR)
+    const total_study_time_stats = getStatsFromSelector(total_study_time)
+    const total_study_dict = UrlToDictionary(TOTAL_STUDY_KEYS)(total_study_time_stats)
     graph_stats.push(total_study_dict)
 
-    var attending_stud = $(ATTENDING_STUD_SELECTOR)
-    var attending_stud_stats = getStatsFromSelector(attending_stud)
-    var attending_stud_dict = UrlToDictionary(ATTENDING_STUD_KEYS)(attending_stud_stats)
+    const attending_stud = $(ATTENDING_STUD_SELECTOR)
+    const attending_stud_stats = getStatsFromSelector(attending_stud)
+    const attending_stud_dict = UrlToDictionary(ATTENDING_STUD_KEYS)(attending_stud_stats)
     graph_stats.push(attending_stud_dict)
 
-    var enrollment_year = $(ENROLLMENT_YEAR_SELECTOR)
-    var enrollment_year_stats = getStatsFromSelector(enrollment_year)
-    var enrollment_year_dict = UrlToDictionary(ENROLLMENT_YEAR_KEYS)(enrollment_year_stats)
+    const enrollment_year = $(ENROLLMENT_YEAR_SELECTOR)
+    const enrollment_year_stats = getStatsFromSelector(enrollment_year)
+    const enrollment_year_dict = UrlToDictionary(ENROLLMENT_YEAR_KEYS)(enrollment_year_stats)
     graph_stats.push(enrollment_year_dict)
 
     return graph_stats;
@@ -88,42 +88,34 @@ const extractFromGraphs = $ => {
  * @param {*} $ 
  */
 const extractFromTable = $ => {
-    var table_stats = []
-    // Extract from frequentanti
-    if(!_.isNull($(TABLEF_SELECTOR))) {
-        $(TABLEF_SELECTOR).each((i, el) => {
-            var questions_f = extractFromQuestion(el)($)
-            table_stats.push(questions_f)
-        })
-    }
-    // Extract from non frequentanti
-    if(!_.isNull($(TABLENF_SELECTOR))) {
-        $(TABLENF_SELECTOR).each((i, el) => {
-            var questions_nf = extractFromQuestion(el)($)
-            table_stats.push(questions_nf)
-        })
-    }
-    // Extract from reasons table
-    if(!_.isNull($(TABLE_REASONS_SELECTOR))) {
-        $(TABLE_REASONS_SELECTOR).each((i, el) => {
-            var reasons = extractFromReason(el)($)
-            table_stats.push(reasons)
-        })
-    }
-    // Extract from frequentanti suggestions
-    if(!_.isNull($(TABLEF_SUGGESTIONS_SELECTOR))) {
-        $(TABLEF_SUGGESTIONS_SELECTOR).each((i, el) => {
-            var suggestions_f = extractFromSuggestion(el)($)
-            table_stats.push(suggestions_f)
-        })
-    }
-    // Extract from non frequentanti suggestions
-    if(!_.isNull($(TABLENF_SUGGESTIONS_SELECTOR))) {
-        $(TABLENF_SUGGESTIONS_SELECTOR).each((i, el) => {
-            var suggestions_nf = extractFromSuggestion(el)($)
-            table_stats.push(suggestions_nf)
-        })
-    }
+    let table_stats = []
+
+    $('b').each(function() {
+        if( $(this).text().indexOf('SCHEDE') > -1) {
+            const table = $(this).next().next()
+
+            if( $(this).text().indexOf('valutaz. studenti') > -1) {
+                table.find('tr:not(:first-child)').each( (i, el) => {
+                    let questions = extractFromQuestion(el)($)
+                    console.log(questions)
+                })
+            }
+
+            else if( $(this).text().indexOf('motivo') > -1) {
+                table.find('tr:not(:first-child)').each( (i, el) => {
+                    let reasons = extractFromReason(el)($)
+                    console.log(reasons)
+                })
+            }
+
+            else if( $(this).text().indexOf('Suggerimenti') > -1) {
+                table.find('tr:not(:first-child)').each( (i, el) => {
+                    let suggestions = extractFromSuggestion(el)($)
+                    console.log(suggestions)
+                })
+            }
+        }
+    })
 
     return table_stats;
     // returns an array
@@ -134,20 +126,20 @@ const extractFromTable = $ => {
  * @param {*} elem 
  */
 const extractFromQuestion = elem => $ => {
-    var questions = []
+    let questions = []
 
-    var tds = $(elem).find('td')
-    var descr = getElemInnerText($(tds[0]))
-    var decisamente_no = getElemInnerText($(tds[1]))
-    var no_che_si = getElemInnerText($(tds[2]))
-    var si_che_no = getElemInnerText($(tds[3]))
-    var si = getElemInnerText($(tds[4]))
-    var non_so = getElemInnerText($(tds[5]))
+    const tds = $(elem).find('td')
+    const descr = getElemInnerText($(tds[0]))
+    const decisamente_no = getElemInnerText($(tds[1]))
+    const no_che_si = getElemInnerText($(tds[2]))
+    const si_che_no = getElemInnerText($(tds[3]))
+    const si = getElemInnerText($(tds[4]))
+    const non_so = getElemInnerText($(tds[5]))
 
     questions.push(descr, decisamente_no, no_che_si, si_che_no, si, non_so)
 
 
-    return questions
+    return questions.map(x => _.isNull(x) ? '0' : x)
 
     // returns an array
 }
@@ -157,13 +149,15 @@ const extractFromQuestion = elem => $ => {
  * @param {*} elem 
  */
 const extractFromReason = elem => $ => {
-    var reasons = []
+    let reasons = []
 
-    var tds = $(elem).find('td')
-    var reason = getElemInnerText($(tds[0]))
-    var percentage = getElemInnerText($(tds[1]))
+    const tds = $(elem).find('td')
+    const reason = getElemInnerText($(tds[0]))
+    const percentage = getElemInnerText($(tds[1]))
 
-    return reasons.push(reason, percentage)
+    reasons.push(reason, percentage)
+
+    return reasons.map(x => _.isNull(x) ? '0' : x)
     //returns an array
 }
 
@@ -172,13 +166,15 @@ const extractFromReason = elem => $ => {
  * @param {*} elem 
  */
 const extractFromSuggestion = elem => $ => {
-    var suggestions = []
+    let suggestions = []
 
-    var tds = $(elem).find('td')
-    var suggestion = getElemInnerText($(tds[0]))
-    var percentage = getElemInnerText($(tds[1]))
+    const tds = $(elem).find('td')
+    const suggestion = getElemInnerText($(tds[0]))
+    const percentage = getElemInnerText($(tds[1]))
 
-    return suggestions.push(suggestion, percentage)
+    suggestions.push(suggestion, percentage)
+
+    return suggestions.map(x => _.isNull(x) ? '0' : x)
     // returns an array
 }
 
@@ -189,7 +185,8 @@ const extractFromSuggestion = elem => $ => {
 const filterGraph = url => type => key => {
     url = url.replace("graph.php?tipo=" + type + "&", "")
     url = url.replace(new RegExp(key, "g"), "")
-    var url_stats = url.split("&")
+    let url_stats = url.split("&")
+    url_stats = url_stats.map(x => x.replace(new RegExp("^[0-9]+="), ""))
 
     return url_stats;
 }
@@ -200,12 +197,11 @@ const filterGraph = url => type => key => {
  * @param {*} keys 
  */
 const UrlToDictionary = keys => elements => {
-    var dict = elements.reduce( (result, field, index) => {
+    const dict = elements.reduce( (result, field, index) => {
         result[keys[index]] = field;
         return result;
     }, {})
-
-    console.log(dict)
+    
     return dict;
 }
 
@@ -215,10 +211,10 @@ const UrlToDictionary = keys => elements => {
  */
 const getStatsFromSelector = elem => {
     if(elem) {
-        var src = getElemAttribute('src')(elem)
-        var type = src.substring(15, src.indexOf("&"))
-        var key = GRAPH_TYPE[type]
-        var raw_stats = filterGraph(src)(type)(key)
+        const src = getElemAttribute('src')(elem)
+        const type = src.substring(15, src.indexOf("&"))
+        const key = GRAPH_TYPE[type]
+        const raw_stats = filterGraph(src)(type)(key)
 
         return raw_stats;
     }

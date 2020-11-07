@@ -1,0 +1,7 @@
+const user = 'username'
+const pass = 'password'
+
+module.exports = {
+    user,
+    pass
+}

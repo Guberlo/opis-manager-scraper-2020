@@ -56,9 +56,25 @@ const isTextEmpty = extractor => elem => {
     return _.isNull(extractor(elem));
 }
 
+/**
+ * Formats the string to avoid problems with MYSQL
+ * @param {*} string 
+ */
+const addslashes = string => {
+    return string.replace(/\\/g, '\\\\').
+        replace(/\u0008/g, '\\b').
+        replace(/\t/g, '\\t').
+        replace(/\n/g, '\\n').
+        replace(/\f/g, '\\f').
+        replace(/\r/g, '\\r').
+        replace(/'/g, '\\\'').
+        replace(/"/g, '\\"');
+}
+
 module.exports = {
     getHtmlFromUrl,
     getElemInnerText,
     getElemAttribute,
-    isTextEmpty
+    isTextEmpty,
+    addslashes
 }

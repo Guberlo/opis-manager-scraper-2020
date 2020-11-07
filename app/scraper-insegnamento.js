@@ -17,7 +17,7 @@ const extractInsStats = elem => $ => {
         const ins_name = $(tds[2]);
         const ins_canale = $(tds[3]);
         const ins_cod_modulo = $(tds[4]);
-        const ins_modulo = $(tds[5]);
+        //const ins_modulo = $(tds[5]);
         const ins_assegnazione = $(tds[6])
         const ins_ssd = $(tds[7]);
         const ins_anno = $(tds[8]);
@@ -29,9 +29,9 @@ const extractInsStats = elem => $ => {
         return  {
             ins_id: getElemInnerText(ins_id),
             ins_name: getElemInnerText(ins_name),
-            ins_canale: getElemInnerText(ins_canale),
-            ins_modulo: getElemInnerText(ins_modulo),
-            ins_cod_modulo: getElemInnerText(ins_cod_modulo),
+            ins_canale: (_.isNull(getElemInnerText(ins_canale)) ? 'no' : getElemInnerText(ins_canale)),
+            //ins_modulo: (_.isNull(getElemInnerText(ins_modulo)) ? '0' : getElemInnerText(ins_canale)),
+            ins_cod_modulo: (_.isNull(getElemInnerText(ins_cod_modulo)) ? '0' : getElemInnerText(ins_cod_modulo)),
             ins_assegnazione: getElemInnerText(ins_assegnazione),
             ins_ssd: getElemInnerText(ins_ssd),
             ins_anno: getElemInnerText(ins_anno),
@@ -44,7 +44,21 @@ const extractInsStats = elem => $ => {
     }
     // If the <tr> is without some attributes (Ex. teaching with multiple professors, only one td will contain all informations, the others will contain just some different infos)
     else {
-        const ins_assegnazione = $(tds[1])
+        const parent = $(tds).parent()
+        let prev_td = $(parent).prev()
+        
+        while(isTextEmpty(getElemInnerText)($(prev_td[0]))) {
+            prev_td = $(prev_td).prev()
+        }
+        prev_td = $(prev_td).find('td')
+        console.log("********************************************")
+
+        const ins_id = $(prev_td[1]);
+        const ins_name = $(prev_td[2]);
+        const ins_canale = $(prev_td[3]);
+        const ins_cod_modulo = $(prev_td[4]);
+        //const ins_modulo = $(prev_td[5]);
+        const ins_assegnazione = $(tds[1]);
         const ins_ssd = $(tds[2]);
         const ins_anno = $(tds[3]);
         const ins_semestre = $(tds[4]);
@@ -52,6 +66,11 @@ const extractInsStats = elem => $ => {
         const ins_docente = $(tds[6]);
 
         return insegnamento = {
+            ins_id: getElemInnerText(ins_id),
+            ins_name: getElemInnerText(ins_name),
+            ins_canale: (_.isNull(getElemInnerText(ins_canale)) ? 'no' : getElemInnerText(ins_canale)),
+            //ins_modulo: (_.isNull(getElemInnerText(ins_modulo)) ? '0' : getElemInnerText(ins_canale)),
+            ins_cod_modulo: (_.isNull(getElemInnerText(ins_cod_modulo)) ? '0' : getElemInnerText(ins_cod_modulo)),
             ins_assegnazione: getElemInnerText(ins_assegnazione),
             ins_ssd: getElemInnerText(ins_ssd),
             ins_anno: getElemInnerText(ins_anno),
