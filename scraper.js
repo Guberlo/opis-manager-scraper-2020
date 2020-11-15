@@ -1,25 +1,22 @@
-const { getHtmlFromUrl, getElemInnerText,getElemAttribute, isTextEmpty } = require('./app/utils'); 
-const { extractDipStats } = require('./app/scraper-dipartimento');
-const { extractCdsStats } = require('./app/scraper-cds');
-const _ = require("lodash");
-const { extractInsStats } = require('./app/scraper-insegnamento');
-const { extractFromGraphs, extractFromTable, extractFromQuestion } = require('./app/scraper-schede');
-const { pool } = require('./app/db-try')
+const { getHtmlFromUrl } = require('./app/utils');
+const { extractDipStats, insertDip } = require('./app/scraper-dipartimento');
+const { extractCdsStats, insCds } = require('./app/scraper-cds');
+// const { extractInsStats } = require('./app/scraper-insegnamento');
+// const { extractFromGraphs, extractFromTable, extractFromQuestion } = require('./app/scraper-schede');
+const { pool, getPrimaryID } = require('./app/db-try');
+const { result } = require('lodash');
 
+const url = 'https://pqa.unict.it/opis/';
+const year = '2020/2021';
 
-const url = "https://pqa.unict.it/opis/";
 const tableSelectorDip = '.col-lg-6 > table > tbody > tr:not(:first-child):not(:last-child)';
 const tableSelectorCds = '.col-lg-6 > table > tbody > tr:not(:first-child)';
-const tableSelectorIns = '.col-lg-6 > table > tbody > tr:not(:first-child)';
-const emptyTd = '.col-lg-6 > table:nth-child(8) > tbody:nth-child(1) > tr:nth-child(58) > td:nth-child(1)';
-
-const dipartimenti = [];
-
-
+// const tableSelectorIns = '.col-lg-6 > table > tbody > tr:not(:first-child)';
+// const emptyTd = '.col-lg-6 > table:nth-child(8) > tbody:nth-child(1) > tr:nth-child(58) > td:nth-child(1)';
 
 // Test request
 
-const resultPromise  = getHtmlFromUrl(url)
+const depRequest = getHtmlFromUrl(url);
 
 /*
 
@@ -40,9 +37,6 @@ const attrTest = resultPromise.then($ => {
 
 */
 
-
-
-
 // Test dipartimenti
 /*
 // Test information for one tr
@@ -52,17 +46,37 @@ const tdTest = resultPromise.then($ => {
 */
 
 // Test information for all tr
-const allTdTest = resultPromise.then($ => {
-    $(tableSelectorDip).each(async (i, el) => {
-        const id = await extractDipStats($(el), $)
-        //console.log(id)
-        console.log("FINISHED DB")
-    });
+async function depsAsync() {
+  const $ = await depRequest;
 
-    //process.exit() // Otherwise it won't close connections wit mysql
-});
+  try {
+    // Process departments data
+    return Promise.all($(tableSelectorDip).map(async (i, el) => {
 
+      // Scrape data from departments
+      const obj = await extractDipStats($(el), $);
 
+      // Insert data into DB
+      await insertDip(obj.unictId, year, obj.name);
+
+      // Push dbid to scrape cds
+      return new Promise( (resolve,reject) => 
+        getPrimaryID(obj.unictId, 'dipartimenti', resolve )
+        );
+    }).toArray());
+
+  } catch (error) {
+    console.log( error )
+}
+
+console.log( "Finished" )
+}
+
+depsAsync().then(ids => {
+  console.log("AAAAAAAA");
+  console.log(ids);
+})
+          .catch(err => console.error(err));
 
 /*
 
@@ -84,27 +98,22 @@ const allCdsTest = resultPromisecds.then($ => {
 })
 */
 
-
 /*
 
 // Test insegnamenti
 
 const resultPromiseIns = getHtmlFromUrl('https://pqa.unict.it/opis/insegn_cds.php?aa=2019&cds=L98&classe=LM-41');
 
-
 // Test for empty td
 const emptyTest = resultPromiseIns.then($ => {
     console.log(isTextEmpty(getElemInnerText)($(emptyTd)));
 })
-
-
 
 // Test insegnamento scraper for one tr
 resultPromiseIns.then($ => {
     var g = extractInsStats($(tableSelectorIns))($);
     console.log(g);
 });
-
 
 // Test insegnamento scraper for all tr
 resultPromiseIns.then($ => {
@@ -114,8 +123,6 @@ resultPromiseIns.then($ => {
 });
 
 */
-
-
 
 /*
 // Test graphs
