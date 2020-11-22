@@ -4,14 +4,12 @@ const {
 } = require('./utils');
 const { pool } = require('./db-try');
 
-const year = '2020/2021';
-
 /**
  * Takes a <tr> containing info about a cds as an argument.
  * Returns a dict where all cds informations are stored.
  * @param {*} elem
  */
-const extractCdsStats = (elem, $) => {
+const extractCdsStats = async (elem, $) => {
   const tds = $(elem).find('td');
 
   let cdsID = $(tds[0]);
@@ -27,22 +25,21 @@ const extractCdsStats = (elem, $) => {
   linkOpis = getElemAttribute('href')(linkOpis);
 
   return {
-    cdsID: _.isNull(cdsID) ? '0' : cdsID,
+    cdsID: _.isNull(cdsID) ? '' : cdsID,
     cdsName,
     cdsLink,
-    cdsClass: _.isNull(cdsClass) ? 'no' : cdsID,
+    cdsClass: _.isNull(cdsClass) ? '' : cdsClass,
   };
 };
 
-const insCds = (id, nome, classe, dbID) => {
+const insertCds = async (id, year, nome, classe, dbID) => {
   const queryStr = 'INSERT INTO corso_di_studi (unict_id, anno_accademico, nome, classe, id_dipartimento) VALUES (?,?,?,?,?)';
 
   try {
-    pool.query(queryStr, [addslashes(id), year, addslashes(nome), addslashes(classe), dbID], (err, results, fields) => {
-      if (err) throw err;
-    }).then(() => {
-      console.log('Done insert cds.');
-    });
+    pool.query(queryStr, [addslashes(id), year, addslashes(nome), classe, dbID])
+        .then(() => {
+          //console.log('Done insert cds.');
+        });
   } catch (error) {
     console.error(error);
   }
@@ -50,5 +47,5 @@ const insCds = (id, nome, classe, dbID) => {
 
 module.exports = {
   extractCdsStats,
-  insCds,
+  insertCds,
 };

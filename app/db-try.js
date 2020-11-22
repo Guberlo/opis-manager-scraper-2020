@@ -29,7 +29,7 @@ pool.query = util.promisify(pool.query).bind(pool);
 const getPrimaryID = async (unictID, table) => {
   const queryStr = 'SELECT id FROM ?? WHERE unict_id = ? AND anno_accademico = ?';
   try {
-    return await pool.query(queryStr, [table, unictID, year]);
+    return pool.query(queryStr, [table, unictID, year]);
   } catch (error) {
     console.error(error);
   }

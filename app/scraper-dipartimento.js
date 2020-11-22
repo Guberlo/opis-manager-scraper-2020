@@ -38,7 +38,7 @@ const insertDip = async (id, anno, nome) => {
   try {
     pool.query(queryString, [id, anno, nome])
         .then(() => {
-          console.log("Done inserti on dipartimenti");
+          //console.log("Done inserti on dipartimenti");
         });
   } catch (error) {
     console.error(error);
