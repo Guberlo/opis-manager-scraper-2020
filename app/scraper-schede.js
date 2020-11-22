@@ -77,17 +77,17 @@ const getStatsFromSelector = (elem) => {
  * Extract from <tr> containing suggestions an returns an array
  * @param {*} elem
  */
-const extractFromSuggestion = (elem) => ($) => {
-  const suggestions = [];
+const extractFromSuggestion = (elem, $) => {
+  let suggestions = [];
 
   const tds = $(elem).find('td');
   const suggestion = getElemInnerText($(tds[0]));
   const percentage = getElemInnerText($(tds[1]));
 
   suggestions.push(suggestion, percentage);
+  suggestions = suggestions.map((x) => (_.isNull(x) ? '0' : x));
 
-  return suggestions.map((x) => (_.isNull(x) ? '0' : x));
-  // returns an array
+  return JSON.stringify(suggestions);
 };
 
 /**
@@ -95,48 +95,47 @@ const extractFromSuggestion = (elem) => ($) => {
    * @param {*} $
    */
 const extractFromGraphs = ($) => {
-  const graphStats = [];
 
-  const ageGraph = $(AGE_GRAPH_SELECTOR);
-  const ageStats = getStatsFromSelector(ageGraph);
+  const ageGraphSel = $(AGE_GRAPH_SELECTOR);
+  const ageStats = getStatsFromSelector(ageGraphSel);
   const ageDict = UrlToDictionary(AGE_KEYS)(ageStats);
-  graphStats.push(ageDict);
 
-  const study = $(STUDY_SELECTOR);
-  const studyStats = getStatsFromSelector(study);
+  const studySel = $(STUDY_SELECTOR);
+  const studyStats = getStatsFromSelector(studySel);
   const studyDict = UrlToDictionary(STUDY_KEYS)(studyStats);
-  graphStats.push(studyDict);
 
-  const meanTravel = $(MEAN_TRAVEL_SELECTOR);
-  const meanTravelStats = getStatsFromSelector(meanTravel);
-  const meanTravelDicts = UrlToDictionary(TRAVEL_KEYS)(meanTravelStats);
-  graphStats.push(meanTravelDicts);
+  const meanTravelSel = $(MEAN_TRAVEL_SELECTOR);
+  const meanTravelStats = getStatsFromSelector(meanTravelSel);
+  const meanTravelDict = UrlToDictionary(TRAVEL_KEYS)(meanTravelStats);
 
-  const totalStudy = $(TOTAL_STUDY_SELECTOR);
-  const totalStudyStats = getStatsFromSelector(totalStudy);
+  const totalStudySel = $(TOTAL_STUDY_SELECTOR);
+  const totalStudyStats = getStatsFromSelector(totalStudySel);
   const totalStudyDict = UrlToDictionary(TOTAL_STUDY_KEYS)(totalStudyStats);
-  graphStats.push(totalStudyDict);
 
-  const attendingStud = $(ATTENDING_STUD_SELECTOR);
-  const attendingStudStats = getStatsFromSelector(attendingStud);
+  const attendingStudSel = $(ATTENDING_STUD_SELECTOR);
+  const attendingStudStats = getStatsFromSelector(attendingStudSel);
   const attendingStudDict = UrlToDictionary(ATTENDING_STUD_KEYS)(attendingStudStats);
-  graphStats.push(attendingStudDict);
 
-  const enrollmentYear = $(ENROLLMENT_YEAR_SELECTOR);
-  const enrollmentYearStats = getStatsFromSelector(enrollmentYear);
+  const enrollmentYearSel = $(ENROLLMENT_YEAR_SELECTOR);
+  const enrollmentYearStats = getStatsFromSelector(enrollmentYearSel);
   const enrollmentYearDict = UrlToDictionary(ENROLLMENT_YEAR_KEYS)(enrollmentYearStats);
-  graphStats.push(enrollmentYearDict);
 
-  return graphStats;
-  // returns an array containing dicts <CHANGE TO RETURNING JUST ONE DICT>
+  return {
+    eta: ageDict,
+    studio_gg: studyDict,
+    ragg_uni: meanTravelDict,
+    studio_tot: totalStudyDict,
+    n_studenti: attendingStudDict,
+    anno_iscr: enrollmentYearDict
+  }
 };
 
 /**
    * Extract data from <tr> containing questions and returns an array
    * @param {*} elem
    */
-const extractFromQuestion = (elem) => ($) => {
-  const questions = [];
+const extractFromQuestion = (elem, $) => {
+  let questions = [];
 
   const tds = $(elem).find('td');
   const descr = getElemInnerText($(tds[0]));
@@ -148,7 +147,9 @@ const extractFromQuestion = (elem) => ($) => {
 
   questions.push(descr, decisamenteNo, noCheSi, siCheNo, si, nonSo);
 
-  return questions.map((x) => (_.isNull(x) ? '0' : x));
+  questions = questions.map((x) => (_.isNull(x) ? '0' : x));
+
+  return JSON.stringify(questions);
 
   // returns an array
 };
@@ -157,16 +158,17 @@ const extractFromQuestion = (elem) => ($) => {
    * Extract from <tr> containing reasons an returns an array
    * @param {*} elem
    */
-const extractFromReason = (elem) => ($) => {
-  const reasons = [];
+const extractFromReason = (elem, $) => {
+  let reasons = [];
 
   const tds = $(elem).find('td');
   const reason = getElemInnerText($(tds[0]));
   const percentage = getElemInnerText($(tds[1]));
 
   reasons.push(reason, percentage);
+  reasons = reasons.map((x) => (_.isNull(x) ? '0' : x));
 
-  return reasons.map((x) => (_.isNull(x) ? '0' : x));
+  return JSON.stringify(reasons);
   // returns an array
 };
 
@@ -174,34 +176,67 @@ const extractFromReason = (elem) => ($) => {
    * Extract data from tables and push it onto an array
    * @param {*} $
    */
-const extractFromTable = ($) => {
-  const tableStats = [];
+const extractFromTable = async ($) => {
+  const questions = await getQuestionsData($);
 
-  $('b').each(function () {
-    if ($(this).text().indexOf('SCHEDE') > -1) {
-      const table = $(this).next().next();
+  const reasons = await getReasonsData($);
 
-      if ($(this).text().indexOf('valutaz. studenti') > -1) {
-        table.find('tr:not(:first-child)').each((i, el) => {
-          const questions = extractFromQuestion(el)($);
-          console.log(questions);
-        });
-      } else if ($(this).text().indexOf('motivo') > -1) {
-        table.find('tr:not(:first-child)').each((i, el) => {
-          const reasons = extractFromReason(el)($);
-          console.log(reasons);
-        });
-      } else if ($(this).text().indexOf('Suggerimenti') > -1) {
-        table.find('tr:not(:first-child)').each((i, el) => {
-          const suggestions = extractFromSuggestion(el)($);
-          console.log(suggestions);
-        });
+  const suggestions = await getSuggestionsData($);
+  
+  return{
+    domande: questions.splice(0,12),
+    domande_nf: questions,
+    motivi: reasons,
+    suggerimenti: suggestions,
+  }
+};
+
+const getQuestionsData = ($) => {
+  return Promise.all( $('b').map((i, el) => {
+    if ($(el).text().indexOf('SCHEDE') > -1) {
+      const table = $(el).next().next();
+
+      if ($(el).text().indexOf('valutaz. studenti') > -1) {
+        return table.find('tr:not(:first-child)').map((i, el) => {
+          return extractFromQuestion(el, $);
+        }).get();
+
       }
     }
-  });
+    
+  }).get());
+};
 
-  return tableStats;
-  // returns an array
+const getReasonsData = ($) => {
+  return Promise.all( $('b').map((i, el) => {
+    if ($(el).text().indexOf('SCHEDE') > -1) {
+      const table = $(el).next().next();
+
+      if ($(el).text().indexOf('motivo') > -1) {
+        return table.find('tr:not(:first-child)').map((i, el) => {
+          return extractFromReason(el, $);
+        }).get();
+
+      }
+    }
+    
+  }).get());
+};
+
+const getSuggestionsData = ($) => {
+  return Promise.all( $('b').map((i, el) => {
+    if ($(el).text().indexOf('SCHEDE') > -1) {
+      const table = $(el).next().next();
+
+      if ($(el).text().indexOf('Suggerimenti') > -1) {
+        return table.find('tr:not(:first-child)').map((i, el) => {
+          return extractFromSuggestion(el, $);
+        }).get();
+
+      }
+    }
+    
+  }).get());
 };
 
 const extractSchedeStats = ($) => {
@@ -211,11 +246,19 @@ const extractSchedeStats = ($) => {
   const numSchedeNF = $(NUM_SCHEDE_NF_SELECTOR);
   const fuoricorsoNF = $(FUORICORSO_NF_SELECTOR);
 
-  const graphInfo = extractFromGraphs($);
-  const tableInfo = extractFromTable($);
+  return {
+    numSchedeF: getElemInnerText(numSchedeF),
+    fuoricorsoF: getElemInnerText(fuoricorsoF),
+    numSchedeNF: getElemInnerText(numSchedeNF),
+    fuoricorsoNF: getElemInnerText(fuoricorsoNF),
+  }
 };
+
 module.exports = {
   extractFromGraphs,
   extractFromTable,
   extractFromQuestion,
+  extractFromReason,
+  extractFromSuggestion,
+  extractSchedeStats
 };
