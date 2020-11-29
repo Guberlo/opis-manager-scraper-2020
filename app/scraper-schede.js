@@ -28,7 +28,8 @@ const GRAPH_TYPE = {
   anno: 'iscr',
 };
 
-// IMPLEMENT TABLE NON FREQ, TABLE FOR REASONS, TABLE FOR SUGGETIONS FREQ AND NOT FREQ
+const YEAR = '2020/2021';
+let i = 0;
 
 /**
  * Filter graph's link to return the number of answer per category (Ex. eta1=22...)
@@ -63,7 +64,9 @@ const UrlToDictionary = (keys) => (elements) => {
  */
 const getStatsFromSelector = (elem) => {
   if (elem) {
+    console.log(i++);
     const src = getElemAttribute('src')(elem);
+    console.log(src);
     const type = src.substring(15, src.indexOf('&'));
     const key = GRAPH_TYPE[type];
     const rawStats = filterGraph(src)(type)(key);

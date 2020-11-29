@@ -35,7 +35,17 @@ const getPrimaryID = async (unictID, table) => {
   }
 };
 
+const getPrimaryIdIns = async (codice, canale) => {
+  const queryStr = 'SELECT id FROM insegnamento WHERE codice_gomp = ? AND anno_accademico = ? AND canale = ?';
+  try {
+    return pool.query(queryStr, [codice, year, canale]);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 module.exports = {
   pool,
   getPrimaryID,
+  getPrimaryIdIns,
 };
