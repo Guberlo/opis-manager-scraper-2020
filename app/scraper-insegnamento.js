@@ -6,8 +6,6 @@ const { pool } = require('./db-try');
 
 const year = '2020/2021';
 
-// <--! TODO ! --> IMPLEMENT METHOD TO JOIN MULTIPLE PIECES OF THE SAME TEACHING
-
 /**
  * Takes a <tr> containing info about a taching as an argument.
  * Returns a dict where all info are stored.
@@ -16,6 +14,7 @@ const year = '2020/2021';
 const extractInsStats = async (elem, $) => {
   // If the <tr> contains all the needed informations about teaching
   const tds = $(elem).find('td');
+  
   if ($(tds).html() !== "&#xA0;") {
     const insID = $(tds[1]);
     const insName = $(tds[2]);

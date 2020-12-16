@@ -28,13 +28,11 @@ const GRAPH_TYPE = {
   anno: 'iscr',
 };
 
-// IMPLEMENT TABLE NON FREQ, TABLE FOR REASONS, TABLE FOR SUGGETIONS FREQ AND NOT FREQ
-
 /**
  * Filter graph's link to return the number of answer per category (Ex. eta1=22...)
  * @param {*} url
  */
-const filterGraph = (url) => (type) => (key) => {
+const filterGraph = (url, type, key) => {
   url = url.replace(`graph.php?tipo=${type}&`, '');
   url = url.replace(new RegExp(key, 'g'), '');
   let urlStats = url.split('&');
@@ -48,7 +46,7 @@ const filterGraph = (url) => (type) => (key) => {
  * With graph labels as key (Ex. fino 50:22)
  * @param {*} keys
  */
-const UrlToDictionary = (keys) => (elements) => {
+const UrlToDictionary = (keys, elements) => {
   const dict = elements.reduce((result, field, index) => {
     result[keys[index]] = field;
     return result;
@@ -66,10 +64,11 @@ const getStatsFromSelector = (elem) => {
     const src = getElemAttribute('src')(elem);
     const type = src.substring(15, src.indexOf('&'));
     const key = GRAPH_TYPE[type];
-    const rawStats = filterGraph(src)(type)(key);
+    const rawStats = filterGraph(src, type, key);
 
     return rawStats;
   }
+  console.log("<--Elem is null-->" + elem);
   return null;
 };
 
@@ -98,27 +97,27 @@ const extractFromGraphs = ($) => {
 
   const ageGraphSel = $(AGE_GRAPH_SELECTOR);
   const ageStats = getStatsFromSelector(ageGraphSel);
-  const ageDict = UrlToDictionary(AGE_KEYS)(ageStats);
+  const ageDict = UrlToDictionary(AGE_KEYS, ageStats);
 
   const studySel = $(STUDY_SELECTOR);
   const studyStats = getStatsFromSelector(studySel);
-  const studyDict = UrlToDictionary(STUDY_KEYS)(studyStats);
+  const studyDict = UrlToDictionary(STUDY_KEYS, studyStats);
 
   const meanTravelSel = $(MEAN_TRAVEL_SELECTOR);
   const meanTravelStats = getStatsFromSelector(meanTravelSel);
-  const meanTravelDict = UrlToDictionary(TRAVEL_KEYS)(meanTravelStats);
+  const meanTravelDict = UrlToDictionary(TRAVEL_KEYS, meanTravelStats);
 
   const totalStudySel = $(TOTAL_STUDY_SELECTOR);
   const totalStudyStats = getStatsFromSelector(totalStudySel);
-  const totalStudyDict = UrlToDictionary(TOTAL_STUDY_KEYS)(totalStudyStats);
+  const totalStudyDict = UrlToDictionary(TOTAL_STUDY_KEYS, totalStudyStats);
 
   const attendingStudSel = $(ATTENDING_STUD_SELECTOR);
   const attendingStudStats = getStatsFromSelector(attendingStudSel);
-  const attendingStudDict = UrlToDictionary(ATTENDING_STUD_KEYS)(attendingStudStats);
+  const attendingStudDict = UrlToDictionary(ATTENDING_STUD_KEYS, attendingStudStats);
 
   const enrollmentYearSel = $(ENROLLMENT_YEAR_SELECTOR);
   const enrollmentYearStats = getStatsFromSelector(enrollmentYearSel);
-  const enrollmentYearDict = UrlToDictionary(ENROLLMENT_YEAR_KEYS)(enrollmentYearStats);
+  const enrollmentYearDict = UrlToDictionary(ENROLLMENT_YEAR_KEYS, enrollmentYearStats);
 
   return {
     eta: ageDict,
@@ -192,51 +191,63 @@ const extractFromTable = async ($) => {
 };
 
 const getQuestionsData = ($) => {
-  return Promise.all( $('b').map((i, el) => {
-    if ($(el).text().indexOf('SCHEDE') > -1) {
-      const table = $(el).next().next();
-
-      if ($(el).text().indexOf('valutaz. studenti') > -1) {
-        return table.find('tr:not(:first-child)').map((i, el) => {
-          return extractFromQuestion(el, $);
-        }).get();
-
+  try {
+    return Promise.all( $('b').map((i, el) => {
+      if ($(el).text().indexOf('SCHEDE') > -1) {
+        const table = $(el).next().next();
+  
+        if ($(el).text().indexOf('valutaz. studenti') > -1) {
+          return table.find('tr:not(:first-child)').map((i, el) => {
+            return extractFromQuestion(el, $);
+          }).get();
+  
+        }
       }
-    }
-    
-  }).get());
+      
+    }).get());
+  } catch(e) {
+    console.error(e);
+  }
 };
 
 const getReasonsData = ($) => {
-  return Promise.all( $('b').map((i, el) => {
-    if ($(el).text().indexOf('SCHEDE') > -1) {
-      const table = $(el).next().next();
-
-      if ($(el).text().indexOf('motivo') > -1) {
-        return table.find('tr:not(:first-child)').map((i, el) => {
-          return extractFromReason(el, $);
-        }).get();
-
+  try {
+    return Promise.all( $('b').map((i, el) => {
+      if ($(el).text().indexOf('SCHEDE') > -1) {
+        const table = $(el).next().next();
+  
+        if ($(el).text().indexOf('motivo') > -1) {
+          return table.find('tr:not(:first-child)').map((i, el) => {
+            return extractFromReason(el, $);
+          }).get();
+  
+        }
       }
-    }
-    
-  }).get());
+      
+    }).get());
+  } catch(e) {
+    console.error(e);
+  }
 };
 
 const getSuggestionsData = ($) => {
-  return Promise.all( $('b').map((i, el) => {
-    if ($(el).text().indexOf('SCHEDE') > -1) {
-      const table = $(el).next().next();
-
-      if ($(el).text().indexOf('Suggerimenti') > -1) {
-        return table.find('tr:not(:first-child)').map((i, el) => {
-          return extractFromSuggestion(el, $);
-        }).get();
-
+  try {
+    return Promise.all( $('b').map((i, el) => {
+      if ($(el).text().indexOf('SCHEDE') > -1) {
+        const table = $(el).next().next();
+  
+        if ($(el).text().indexOf('Suggerimenti') > -1) {
+          return table.find('tr:not(:first-child)').map((i, el) => {
+            return extractFromSuggestion(el, $);
+          }).get();
+  
+        }
       }
-    }
-    
-  }).get());
+      
+    }).get());
+  } catch(e) {
+    console.error(e);
+  }
 };
 
 const extractSchedeStats = ($) => {
