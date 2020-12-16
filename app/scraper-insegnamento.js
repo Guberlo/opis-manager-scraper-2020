@@ -100,7 +100,7 @@ const insertInsegnamento = async (obj, dbID) => {
     pool.query(queryStr, [obj.insID,
       addslashes(obj.insName),
       addslashes(obj.insCanale),
-      obj.cod_modulo,
+      obj.insCodModulo,
       addslashes(obj.insSSD),
       addslashes(obj.insAnno),
       addslashes(obj.insSemestre),

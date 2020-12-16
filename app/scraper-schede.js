@@ -28,6 +28,9 @@ const GRAPH_TYPE = {
   anno: 'iscr',
 };
 
+const YEAR = '2020/2021';
+let i = 0;
+
 /**
  * Filter graph's link to return the number of answer per category (Ex. eta1=22...)
  * @param {*} url
@@ -61,7 +64,9 @@ const UrlToDictionary = (keys, elements) => {
  */
 const getStatsFromSelector = (elem) => {
   if (elem) {
+    console.log(i++);
     const src = getElemAttribute('src')(elem);
+    console.log(src);
     const type = src.substring(15, src.indexOf('&'));
     const key = GRAPH_TYPE[type];
     const rawStats = filterGraph(src, type, key);

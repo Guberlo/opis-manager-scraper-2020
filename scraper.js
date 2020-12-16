@@ -3,7 +3,7 @@ const { extractDipStats, insertDip } = require('./app/scraper-dipartimento');
 const { extractCdsStats, insertCds } = require('./app/scraper-cds');
 const { extractInsStats, insertInsegnamento } = require('./app/scraper-insegnamento');
 const { extractFromGraphs, extractFromTable, extractFromQuestion, extractFromReason, extractFromSuggestion, extractSchedeStats } = require('./app/scraper-schede');
-const { getPrimaryID, pool } = require('./app/db-try');
+const { getPrimaryID, getPrimaryIdIns } = require('./app/db-try');
 const _ = require('lodash');
 
 const url = 'https://pqa.unict.it/opis/';
@@ -86,7 +86,7 @@ async function cdsAsync(depID, dbID) {
       await insertCds(obj.cdsID, year, obj.cdsName, obj.cdsClass, dbID);
 
       const id = await getPrimaryID(obj.cdsID, 'corso_di_studi');
-      console.log(`ID: ${id[0].id}`);
+      // console.log(`ID: ${id[0].id}`);
       // Push dbid to scrape cds
       return {
         dbID: id,
@@ -111,13 +111,14 @@ async function insAsync(cdsID, cdsClass, dbID) {
       // Scrape data from departments
       const obj = await extractInsStats($(el), $);
 
-      // Insert data into DB
+      // Insert data into DB - rm await
       await insertInsegnamento(obj, dbID);
+
+      const id = await getPrimaryIdIns(obj.insID, obj.insCanale);
 
       // Push dbid to scrape cds
       return {
-        // dbID: await getPrimaryID(obj.insID, 'insegnamento'),
-        cdsID: obj.cdsID,
+        dbID: id,
         linkOpis: obj.linkOpis,
       };
     }).toArray());
@@ -134,12 +135,11 @@ async function schedeAsync(dbID, link) {
 
   const grafici = extractFromGraphs($);
 
-  const questions = extractFromTable($);
+  const questions = await extractFromTable($);
 
   return [schedeStats, grafici, questions];
 
 }
-
 
 
 depsAsync().then((depsArray) => {
@@ -150,16 +150,20 @@ depsAsync().then((depsArray) => {
     // Scrape and insert cds
 
     cdsAsync(dep.depID, dep.dbID).then(async (cdsArray) => {
-      console.log(cdsArray);
       for await (const cds of cdsArray) {
         // Get field vallue from RowPacket
         // <---! ERROR Sometimes cbs.dbID is not recognized. inspect what the problem might be --->
         cds.dbID = cds.dbID[0].id;
 
         // Scrape and insert insegnamenti
-        insAsync(cds.cdsID, cds.cdsClass, cds.dbID).then(async res => {
-          if(res.linkOpis != 'Scheda non autorizzata alla pubblicazione') {
-            console.log(res.linkOpis);
+        insAsync(cds.cdsID, cds.cdsClass, cds.dbID).then(async ins => {
+          if(ins[1].linkOpis !== 'Scheda non autorizzata alla pubblicazione') {
+            const id = ins[0].dbID[0].id;
+            const link = url + (ins[1].linkOpis);
+
+            console.log(link);
+            
+            console.log(await schedeAsync(id, link));
           }
         });
       }
@@ -240,9 +244,14 @@ resultPromiseGraph.then($ => {
         })
     }
 })
+*/
 
+
+/*
+const link = 'https://pqa.unict.it/opis/_val_insegn.php?aa=2019&ins=1015126&mod=&canale=&s1=109&s3=23&id=1339&classe=L-31&cds=X81';
 
 resultPromiseGraph.then($ => {
-  extractFromTable($).then(res => console.log(res));
+  schedeAsync('1', link).then(res => console.log(res[2]));
 })
+
 */

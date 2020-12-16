@@ -1,0 +1,20 @@
+CREATE TABLE insegnamento (
+    id int NOT NULL AUTO_INCREMENT,
+    codice_gomp int,
+    nome varchar(255),
+    anno_accademico varchar(255),
+    anno varchar(255),
+    semestre varchar(255),
+    cfu varchar(255),
+    docente varchar(255),
+    canale varchar(255),
+    id_modulo varchar(255),
+    nome_modulo varchar(255),
+    tipo varchar(255),
+    ssd varchar(255),
+    assegn varchar(255),
+    id_cds int,
+    PRIMARY KEY (id),
+    UNIQUE (id, codice_gomp),
+    FOREIGN KEY (id_cds) REFERENCES corso_di_studi(id)
+)
