@@ -7,5 +7,5 @@ CREATE TABLE corso_di_studi (
     id_dipartimento int,
     PRIMARY KEY (id),
     UNIQUE (id, unict_id),
-    FOREIGN KEY (id_dipartimento) REFERENCES dipartimenti(id)
+    FOREIGN KEY (id_dipartimento) REFERENCES dipartimento(id)
 )

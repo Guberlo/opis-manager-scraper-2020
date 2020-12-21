@@ -1,6 +1,7 @@
 const { result } = require('lodash');
 const mysql = require('mysql');
 const util = require('util');
+const { addslashes } = require('./utils');
 
 const year = '2020/2021';
 const { user, pass } = require('./config');
@@ -9,7 +10,7 @@ const config = {
   user,
   password: pass,
   database: 'opis_manager',
-  connectionLimit: 5,
+  connectionLimit: 20,
   connectionTimeout: 10000,
   acquireTimeout: 10000,
   waitForConnections: true,
@@ -35,10 +36,19 @@ const getPrimaryID = async (unictID, table) => {
   }
 };
 
-const getPrimaryIdIns = async (codice, canale) => {
-  const queryStr = 'SELECT id FROM insegnamento WHERE codice_gomp = ? AND anno_accademico = ? AND canale = ?';
+const getPrimaryIdIns = async (codice, canale, docente) => {
+  const queryStr = 'SELECT id FROM insegnamento WHERE codice_gomp = ? AND anno_accademico = ? AND canale = ? AND docente = ?';
   try {
-    return pool.query(queryStr, [codice, year, canale]);
+    return pool.query(queryStr, [codice, year, canale, addslashes(docente)]);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const getPrimaryIdInsTest = async (codice, canale, docente) => {
+  const queryStr = 'SELECT id FROM insegnamento WHERE codice_gomp = ? AND anno_accademico = ? AND canale = ? AND docente = ?';
+  try {
+    return pool.query(queryStr, [codice, year, canale, addslashes(docente)]);
   } catch (error) {
     console.error(error);
   }
@@ -48,4 +58,5 @@ module.exports = {
   pool,
   getPrimaryID,
   getPrimaryIdIns,
+  getPrimaryIdInsTest,
 };

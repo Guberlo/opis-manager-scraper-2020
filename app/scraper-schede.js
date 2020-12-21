@@ -1,17 +1,6 @@
 const _ = require('lodash');
-const { getElemInnerText, getElemAttribute } = require('./utils');
-
-const NUM_SCHEDE_F_SELECTOR = '.col-lg-6 > b:nth-child(10) > table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2)';
-const FUORICORSO_F_SELECTOR = '.col-lg-6 > b:nth-child(10) > table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(3)';
-const NUM_SCHEDE_NF_SELECTOR = '.col-lg-6 > b:nth-child(10) > table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(2)';
-const FUORICORSO_NF_SELECTOR = '.col-lg-6 > b:nth-child(10) > table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(3)';
-
-const AGE_GRAPH_SELECTOR = '.col-lg-6 > div:nth-child(11) > img:nth-child(1)';
-const STUDY_SELECTOR = '.col-lg-6 > div:nth-child(11) > img:nth-child(2)';
-const MEAN_TRAVEL_SELECTOR = '.col-lg-6 > div:nth-child(11) > img:nth-child(3)';
-const TOTAL_STUDY_SELECTOR = '.col-lg-6 > div:nth-child(11) > img:nth-child(4)';
-const ATTENDING_STUD_SELECTOR = '.col-lg-6 > div:nth-child(11) > img:nth-child(5)';
-const ENROLLMENT_YEAR_SELECTOR = '.col-lg-6 > div:nth-child(11) > img:nth-child(6)';
+const { getElemInnerText, getElemAttribute, addslashes } = require('./utils');
+const { pool } = require('./db-try');
 
 const AGE_KEYS = ['18-19', '20-21', '22-23', '24-25', '26-27', '28-29', '30 e oltre'];
 const STUDY_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
@@ -64,9 +53,7 @@ const UrlToDictionary = (keys, elements) => {
  */
 const getStatsFromSelector = (elem) => {
   if (elem) {
-    console.log(i++);
     const src = getElemAttribute('src')(elem);
-    console.log(src);
     const type = src.substring(15, src.indexOf('&'));
     const key = GRAPH_TYPE[type];
     const rawStats = filterGraph(src, type, key);
@@ -75,6 +62,29 @@ const getStatsFromSelector = (elem) => {
   }
   console.log("<--Elem is null-->" + elem);
   return null;
+};
+
+/**
+ * Finds the table containing the number
+ * Of students who gave a response and scans it 
+ * @param {*} $ 
+ */
+const extractSchedeStats = ($) => {
+  return Promise.all($('b').map( (i, el) => {
+    if ($(el).text().indexOf('Riepilogo') > -1) {
+      const trs = $(el).find('tr');
+
+      const schedeF = $(trs[1]).find('td');
+      const schedeNF = $(trs[2]).find('td');
+      
+      return {
+        numSchedeF: getElemInnerText($(schedeF[1])),
+        fuoricorsoF: getElemInnerText($(schedeF[2])),
+        numSchedeNF: getElemInnerText($(schedeNF[1])),
+        fuoricorsoNF: getElemInnerText($(schedeNF[2])),
+      }
+    }
+  }).get());
 };
 
 /**
@@ -99,38 +109,39 @@ const extractFromSuggestion = (elem, $) => {
    * @param {*} $
    */
 const extractFromGraphs = ($) => {
+  const graphsSelector = getGraphsSelector($);
 
-  const ageGraphSel = $(AGE_GRAPH_SELECTOR);
+  const ageGraphSel = $(graphsSelector[0]);
   const ageStats = getStatsFromSelector(ageGraphSel);
   const ageDict = UrlToDictionary(AGE_KEYS, ageStats);
 
-  const studySel = $(STUDY_SELECTOR);
+  const studySel = $(graphsSelector[1]);
   const studyStats = getStatsFromSelector(studySel);
   const studyDict = UrlToDictionary(STUDY_KEYS, studyStats);
 
-  const meanTravelSel = $(MEAN_TRAVEL_SELECTOR);
+  const meanTravelSel = $(graphsSelector[2]);
   const meanTravelStats = getStatsFromSelector(meanTravelSel);
   const meanTravelDict = UrlToDictionary(TRAVEL_KEYS, meanTravelStats);
 
-  const totalStudySel = $(TOTAL_STUDY_SELECTOR);
+  const totalStudySel = $(graphsSelector[3]);
   const totalStudyStats = getStatsFromSelector(totalStudySel);
   const totalStudyDict = UrlToDictionary(TOTAL_STUDY_KEYS, totalStudyStats);
 
-  const attendingStudSel = $(ATTENDING_STUD_SELECTOR);
+  const attendingStudSel = $(graphsSelector[4]);
   const attendingStudStats = getStatsFromSelector(attendingStudSel);
   const attendingStudDict = UrlToDictionary(ATTENDING_STUD_KEYS, attendingStudStats);
 
-  const enrollmentYearSel = $(ENROLLMENT_YEAR_SELECTOR);
+  const enrollmentYearSel = $(graphsSelector[5]);
   const enrollmentYearStats = getStatsFromSelector(enrollmentYearSel);
   const enrollmentYearDict = UrlToDictionary(ENROLLMENT_YEAR_KEYS, enrollmentYearStats);
 
   return {
-    eta: ageDict,
-    studio_gg: studyDict,
-    ragg_uni: meanTravelDict,
-    studio_tot: totalStudyDict,
-    n_studenti: attendingStudDict,
-    anno_iscr: enrollmentYearDict
+    eta: JSON.stringify(ageDict),
+    studio_gg: JSON.stringify(studyDict),
+    ragg_uni: JSON.stringify(meanTravelDict),
+    studio_tot: JSON.stringify(totalStudyDict),
+    n_studenti: JSON.stringify(attendingStudDict),
+    anno_iscr: JSON.stringify(enrollmentYearDict),
   }
 };
 
@@ -142,14 +153,13 @@ const extractFromQuestion = (elem, $) => {
   let questions = [];
 
   const tds = $(elem).find('td');
-  const descr = getElemInnerText($(tds[0]));
   const decisamenteNo = getElemInnerText($(tds[1]));
   const noCheSi = getElemInnerText($(tds[2]));
   const siCheNo = getElemInnerText($(tds[3]));
   const si = getElemInnerText($(tds[4]));
   const nonSo = getElemInnerText($(tds[5]));
 
-  questions.push(descr, decisamenteNo, noCheSi, siCheNo, si, nonSo);
+  questions.push(decisamenteNo, noCheSi, siCheNo, si, nonSo);
 
   questions = questions.map((x) => (_.isNull(x) ? '0' : x));
 
@@ -176,6 +186,7 @@ const extractFromReason = (elem, $) => {
   // returns an array
 };
 
+// <!----- REFACTOR THIS IS PURE SHIT -------!>
 /**
    * Extract data from tables and push it onto an array
    * @param {*} $
@@ -185,15 +196,19 @@ const extractFromTable = async ($) => {
 
   const reasons = await getReasonsData($);
 
-  const suggestions = await getSuggestionsData($);
+  const suggestions_f = await getSuggestionsData($, 1);
+
+  const suggestions_nf = await getSuggestionsData($, 3);
   
   return{
-    domande: questions.splice(0,12),
-    domande_nf: questions,
-    motivi: reasons,
-    suggerimenti: suggestions,
+    domande: JSON.stringify(questions.splice(0,12)),
+    domande_nf: JSON.stringify(questions),
+    motivi: JSON.stringify(reasons),
+    suggerimenti_f: JSON.stringify(suggestions_f),
+    suggerimenti_nf: JSON.stringify(suggestions_nf),
   }
 };
+// <!----- REFACTOR THIS IS PURE SHIT -------!>
 
 const getQuestionsData = ($) => {
   try {
@@ -235,10 +250,15 @@ const getReasonsData = ($) => {
   }
 };
 
-const getSuggestionsData = ($) => {
+/**
+ * 
+ * @param {*} $ 
+ * @param {int} fcCode 1 for frequentanti 3 for non frequentanti
+ */
+const getSuggestionsData = ($, fcCode) => {
   try {
     return Promise.all( $('b').map((i, el) => {
-      if ($(el).text().indexOf('SCHEDE') > -1) {
+      if ($(el).text().indexOf(`SCHEDE ${fcCode}`) > -1) {
         const table = $(el).next().next();
   
         if ($(el).text().indexOf('Suggerimenti') > -1) {
@@ -255,18 +275,51 @@ const getSuggestionsData = ($) => {
   }
 };
 
-const extractSchedeStats = ($) => {
-  const numSchedeF = $(NUM_SCHEDE_F_SELECTOR);
-  const fuoricorsoF = $(FUORICORSO_F_SELECTOR);
+/**
+ * Gets the div containg the graphs and 
+ * gets the src value
+ * @param {*} $ 
+ */
+const getGraphsSelector = ($) => {
+  let array = []
+  $('b').map( (i, el) => {
+    if ($(el).text().indexOf('Riepilogo') > -1) {
+      graphs = ($(el).next().find('img'));
 
-  const numSchedeNF = $(NUM_SCHEDE_NF_SELECTOR);
-  const fuoricorsoNF = $(FUORICORSO_NF_SELECTOR);
+      graphs.map( (j,element) => {
+        array.push(element);
+      });
+    }
+  });
 
-  return {
-    numSchedeF: getElemInnerText(numSchedeF),
-    fuoricorsoF: getElemInnerText(fuoricorsoF),
-    numSchedeNF: getElemInnerText(numSchedeNF),
-    fuoricorsoNF: getElemInnerText(fuoricorsoNF),
+  return array;
+};
+
+const insertScheda = async (schedeStats, grafici, questions, id_insegnamento) => {
+  const queryStr = 'INSERT INTO schede_opis (totale_schede, totale_schede_nf, fc, inatt_nf, eta, anno_iscr, num_studenti, ragg_uni, studio_gg, studio_tot, domande, domande_nf, motivo_nf, sugg, sugg_nf, id_insegnamento, anno_accademico) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+  try {
+    pool.query(queryStr, [schedeStats[0].numSchedeF,
+                          schedeStats[0].numSchedeNF,
+                          schedeStats[0].fuoricorsoF,
+                          schedeStats[0].fuoricorsoNF,
+                          grafici.eta,
+                          grafici.anno_iscr,
+                          grafici.n_studenti,
+                          grafici.ragg_uni,
+                          grafici.studio_gg,
+                          grafici.studio_tot,
+                          questions.domande,
+                          questions.domande_nf,
+                          questions.motivi,
+                          questions.suggerimenti_f,
+                          questions.suggerimenti_nf,
+                          id_insegnamento,
+                          YEAR])
+        .then(() => {
+          console.log('#### \t\t\t \033[34m\t' +  id_insegnamento +'\033[0m' + ' [' + schedeStats[0].numSchedeF + ']');
+        });
+  } catch (error) {
+    console.error(error);
   }
 };
 
@@ -276,5 +329,6 @@ module.exports = {
   extractFromQuestion,
   extractFromReason,
   extractFromSuggestion,
-  extractSchedeStats
+  extractSchedeStats,
+  insertScheda
 };

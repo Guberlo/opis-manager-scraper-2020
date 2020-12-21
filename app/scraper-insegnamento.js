@@ -94,7 +94,7 @@ const extractInsStats = async (elem, $) => {
 };
 
 const insertInsegnamento = async (obj, dbID) => {
-  const queryStr = 'INSERT INTO insegnamento (codice_gomp, nome, canale, id_modulo, ssd, anno, semestre, cfu, docente, assegn, id_cds, anno_accademico) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)';
+  const queryStr = 'INSERT IGNORE INTO insegnamento (codice_gomp, nome, canale, id_modulo, ssd, anno, semestre, cfu, docente, assegn, id_cds, anno_accademico) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)';
 
   try {
     pool.query(queryStr, [obj.insID,
@@ -109,7 +109,7 @@ const insertInsegnamento = async (obj, dbID) => {
       addslashes(obj.insAssegnazione),
       dbID,
       year]).then(() => {
-      //console.log('Done insert ins.');
+        console.log('### \t\t \033[35m\t' +  obj.insName +'\033[0m');
     });
   } catch (error) {
     console.error(error);

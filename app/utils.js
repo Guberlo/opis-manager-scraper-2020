@@ -61,10 +61,17 @@ const addslashes = (string) => string.replace(/\\/g, '\\\\')
   .replace(/'/g, '\\\'')
   .replace(/"/g, '\\"');
 
+const sleep = ms => {
+  return new Promise(resolve => {
+    setTimeout(resolve, ms);
+  });
+}
+
 module.exports = {
   getHtmlFromUrl,
   getElemInnerText,
   getElemAttribute,
   isTextEmpty,
   addslashes,
+  sleep,
 };

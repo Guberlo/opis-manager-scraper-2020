@@ -34,11 +34,11 @@ const extractDipStats = async (elem, $) => {
 };
 
 const insertDip = async (id, anno, nome) => {
-  const queryString = 'INSERT INTO dipartimenti (unict_id, anno_accademico, nome) VALUES (?, ?, ?)';
+  const queryString = 'INSERT IGNORE INTO dipartimento (unict_id, anno_accademico, nome) VALUES (?, ?, ?)';
   try {
     pool.query(queryString, [id, anno, nome])
         .then(() => {
-          //console.log("Done inserti on dipartimenti");
+          console.log('# \033[33m\t' +  nome +'\033[0m\n');
         });
   } catch (error) {
     console.error(error);
