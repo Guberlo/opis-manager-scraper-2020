@@ -1,4 +1,4 @@
-const { getHtmlFromUrl, sleep } = require('./app/utils');
+const { getHtmlFromUrl } = require('./app/utils');
 const { extractDipStats, insertDip } = require('./app/scraper-dipartimento');
 const { extractCdsStats, insertCds } = require('./app/scraper-cds');
 const { extractInsStats, insertInsegnamento } = require('./app/scraper-insegnamento');
@@ -84,15 +84,17 @@ async function insAsync(cdsID, cdsClass, dbID) {
       // Scrape data from departments
       const obj = await extractInsStats($(el), $);
 
-      // Insert data into DB - rm await
+      // Insert data into DB
       await insertInsegnamento(obj, dbID);
 
       let id = await getPrimaryIdIns(obj.insID, obj.insCanale, obj.insDocente);
 
+      // <--- JUST FOR DEBUGGING --->
       if(_.isEmpty(id)) {
         console.log(`ID INS NULL: ${obj.insID}, ${obj.insCanale}, ${obj.insDocente}`);
         id = await getPrimaryIdInsTest(obj.insID, obj.insCanale, obj.insDocente);
       }
+      // <--- JUST FOR DEBUGGING --->
 
       // Push dbid to scrape cds
       return {
@@ -132,7 +134,7 @@ depsAsync().then((depsArray) => {
     cdsAsync(dep.depID, dep.dbID).then(async (cdsArray) => {
       cdsArray.forEach(cds => {
         // Get field vallue from RowPacket
-        // <---! ERROR Sometimes cbs.dbID is not recognized. inspect what the problem might be --->
+        // <---! ERROR Sometimes cbs.dbID is undefined. inspect what the problem might be --->
         cds.dbID = cds.dbID[0].id;
 
         // Scrape and insert insegnamenti
@@ -145,12 +147,15 @@ depsAsync().then((depsArray) => {
               //console.log(link);
               
               await schedeAsync(id, link);
+
+              // Close connection
             }
           })
         });
       })
     }).catch((error) => {
       console.log(error);
+      return -1;
     });
   });
 })

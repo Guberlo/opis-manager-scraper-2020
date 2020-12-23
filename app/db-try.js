@@ -45,6 +45,7 @@ const getPrimaryIdIns = async (codice, canale, docente) => {
   }
 };
 
+// <!--JUST FOR DEBUGGING !-->
 const getPrimaryIdInsTest = async (codice, canale, docente) => {
   const queryStr = 'SELECT id FROM insegnamento WHERE codice_gomp = ? AND anno_accademico = ? AND canale = ? AND docente = ?';
   try {
