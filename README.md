@@ -15,7 +15,7 @@ I've tried to stick as much as possible to the [previous scraper](https://github
 * **Type the following in your shell: `npm install`**
 * **Type `node scraper.js`**
 
-## Create the db
+### Create the db
 ```bash
 $ mysql -u username -p
 > CREATE DATABASE opis_manager;
