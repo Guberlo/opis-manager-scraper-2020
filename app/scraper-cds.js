@@ -34,12 +34,11 @@ const extractCdsStats = async (elem, $) => {
 
 const insertCds = async (id, year, nome, classe, dbID) => {
   const queryStr = 'INSERT INTO corso_di_studi (unict_id, anno_accademico, nome, classe, id_dipartimento) VALUES (?,?,?,?,?)';
-  console.log('ID: ' + id);
-
   try {
-    pool.query(queryStr, [addslashes(id), year, addslashes(nome), classe, dbID])
-        .then(() => {
+    return pool.query(queryStr, [addslashes(id), year, addslashes(nome), classe, dbID])
+        .then(res => {
           console.log('##\t \033[36m\t' +  nome +'\033[0m');
+          return res.insertId;
         });
   } catch (error) {
     console.error(error);

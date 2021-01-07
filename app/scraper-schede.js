@@ -298,7 +298,7 @@ const getGraphsSelector = ($) => {
 const insertScheda = async (schedeStats, grafici, questions, id_insegnamento) => {
   const queryStr = 'INSERT INTO schede_opis (totale_schede, totale_schede_nf, fc, inatt_nf, eta, anno_iscr, num_studenti, ragg_uni, studio_gg, studio_tot, domande, domande_nf, motivo_nf, sugg, sugg_nf, id_insegnamento, anno_accademico) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
   try {
-    pool.query(queryStr, [schedeStats[0].numSchedeF,
+    return pool.query(queryStr, [schedeStats[0].numSchedeF,
                           schedeStats[0].numSchedeNF,
                           schedeStats[0].fuoricorsoF,
                           schedeStats[0].fuoricorsoNF,
@@ -315,9 +315,10 @@ const insertScheda = async (schedeStats, grafici, questions, id_insegnamento) =>
                           questions.suggerimenti_nf,
                           id_insegnamento,
                           YEAR])
-        .then(() => {
-          console.log('#### \t\t\t \033[34m\t' +  id_insegnamento +'\033[0m' + ' [' + schedeStats[0].numSchedeF + ']');
-        });
+              .then(res => {
+                console.log('#### \t\t\t \033[34m\t' +  id_insegnamento +'\033[0m' + ' [' + schedeStats[0].numSchedeF + ']');
+                return res.insertId;
+              });
   } catch (error) {
     console.error(error);
   }

@@ -27,7 +27,7 @@ pool.getConnection((err, connection) => {
 
 pool.query = util.promisify(pool.query).bind(pool);
 
-const getPrimaryID = async (unictID, table) => {
+const getPrimaryID = (unictID, table) => {
   const queryStr = 'SELECT id FROM ?? WHERE unict_id = ? AND anno_accademico = ?';
   try {
     return pool.query(queryStr, [table, unictID, year]);
@@ -36,7 +36,16 @@ const getPrimaryID = async (unictID, table) => {
   }
 };
 
-const getPrimaryIdIns = async (codice, canale, docente) => {
+const getDeps = (table) => {
+  const queryStr = 'SELECT id FROM ??';
+  try {
+    return pool.query(queryStr, table);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const getPrimaryIdIns = (codice, canale, docente) => {
   const queryStr = 'SELECT id FROM insegnamento WHERE codice_gomp = ? AND anno_accademico = ? AND canale = ? AND docente = ?';
   try {
     return pool.query(queryStr, [codice, year, canale, addslashes(docente)]);
@@ -60,4 +69,5 @@ module.exports = {
   getPrimaryID,
   getPrimaryIdIns,
   getPrimaryIdInsTest,
+  getDeps,
 };
