@@ -3,6 +3,8 @@
 This project aims to scrape data from the new __constantly changing__ opis web site, in order to provide data to the [opis manager](https://github.com/UNICT-DMI/OPIS-Manager). It is written in Node.js (I wanted to learn something new 😂).
 **DISCLAIMER:** I've just started learning js, so you might cringe yourself seeing how badly things might have been implemented.
 
+I've tried to stick as much as possible to the [previous scraper](https://github.com/UNICT-DMI/opis-manager-scraper).
+
 
 #### Start a local instance
 
@@ -13,7 +15,7 @@ This project aims to scrape data from the new __constantly changing__ opis web s
 * **Type the following in your shell: `npm install`**
 * **Type `node scraper.js`**
 
-## Create the db
+### Create the db
 ```bash
 $ mysql -u username -p
 > CREATE DATABASE opis_manager;
