@@ -11,6 +11,7 @@ I've tried to stick as much as possible to the [previous scraper](https://github
 * **Clone this repository**
 * **Install npm**
 * **Install mysql and create a new db**
+* **Rename config.js.dist into congifg.js and insert your mysql username and password**
 * **Cd into the folder**
 * **Type the following in your shell: `npm install`**
 * **Type `node scraper.js`**
