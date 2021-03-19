@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const { getElemInnerText, getElemAttribute, addslashes } = require('./utils');
-const { pool } = require('./db-try');
+const { pool } = require('./db');
 
 const AGE_KEYS = ['18-19', '20-21', '22-23', '24-25', '26-27', '28-29', '30 e oltre'];
 const STUDY_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
@@ -108,7 +108,7 @@ const extractFromSuggestion = (elem, $) => {
    * Extract data from each graph an push it onto an array containing dicts
    * @param {*} $
    */
-const extractFromGraphs = ($) => {
+const extractFromGraphs = async ($) => {
   const graphsSelector = getGraphsSelector($);
 
   const ageGraphSel = $(graphsSelector[0]);

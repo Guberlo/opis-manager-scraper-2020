@@ -23,9 +23,14 @@ pool.getConnection((err, connection) => {
   if (err) throw err;
 
   if (connection) connection.release();
+
 });
 
 pool.query = util.promisify(pool.query).bind(pool);
+
+const closeConnection = () => {
+  pool.end();
+}
 
 const getPrimaryID = (unictID, table) => {
   const queryStr = 'SELECT id FROM ?? WHERE unict_id = ? AND anno_accademico = ?';
@@ -70,4 +75,5 @@ module.exports = {
   getPrimaryIdIns,
   getPrimaryIdInsTest,
   getDeps,
+  closeConnection,
 };

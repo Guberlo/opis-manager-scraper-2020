@@ -2,7 +2,7 @@ const _ = require('lodash');
 const {
   getElemInnerText, getElemAttribute, addslashes,
 } = require('./utils');
-const { pool } = require('./db-try');
+const { pool } = require('./db');
 
 /**
  * Takes a <tr> containing info about a cds as an argument.

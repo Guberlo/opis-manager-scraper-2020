@@ -3,22 +3,14 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 
 /**
- * Compose function arguments starting from right to left
- * to an overall function and returns the overall function
+ * CSS selectors for tables
  */
-const compose = (...fns) => (arg) => _.flattenDeep(fns).reduceRight((current, fn) => {
-  if (_.isFunction(fn)) return fn(current);
-  throw new TypeError('compose() expects only functions as parameters.');
-}, arg);
+const tableSelectorDip = '.col-lg-6 > table > tbody > tr:not(:first-child):not(:last-child)';
+const tableSelectorCds = '.col-lg-6 > table > tbody > tr:not(:first-child)';
+const tableSelectorIns = '.col-lg-6 > table > tbody > tr:not(:first-child)';
 
-/**
- * Compose async function arguments starting from right to left
- * to an overall async function and returns the overall async function
- */
-const composeAsync = (...fns) => (arg) => _.flattenDeep(fns).reduceRight(async (current, fn) => {
-  if (_.isFunction(fn)) return fn(await current);
-  throw new TypeError('compose() expects only functions as parameters.');
-}, arg);
+const url = 'https://pqa.unict.it/opis/';
+const year = '2020/2021';
 
 /**
  * Using axios to get html code, if succeeds uses cheerio to load html
@@ -30,8 +22,10 @@ const getHtmlFromUrl = async (url) => await axios.get(url)
   .then((response) => cheerio.load(response.data))
   .catch((error) => {
     error.status = (error.response && error.response.status) || 500;
-    throw error;
+    console.warn(`URL: ${url}`);
+    //throw error;
   });
+
 
 /**
  * If elem has text, returns the trimmed text
@@ -74,4 +68,9 @@ module.exports = {
   isTextEmpty,
   addslashes,
   sleep,
+  tableSelectorCds,
+  tableSelectorDip,
+  tableSelectorIns,
+  url,
+  year,
 };

@@ -1,5 +1,5 @@
 const { getElemInnerText, getElemAttribute } = require('./utils');
-const { pool } = require('./db-try');
+const { pool } = require('./db');
 
 /**
  * Gets the id from the url
