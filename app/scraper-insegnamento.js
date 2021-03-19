@@ -2,7 +2,7 @@ const _ = require('lodash');
 const {
   getElemInnerText, getElemAttribute, isTextEmpty, addslashes,
 } = require('./utils');
-const { pool } = require('./db-try');
+const { pool } = require('./db');
 
 const year = '2020/2021';
 
