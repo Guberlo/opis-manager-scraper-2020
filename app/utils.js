@@ -10,7 +10,7 @@ const tableSelectorCds = '.col-lg-6 > table > tbody > tr:not(:first-child)';
 const tableSelectorIns = '.col-lg-6 > table > tbody > tr:not(:first-child)';
 
 const url = 'https://pqa.unict.it/opis/';
-const year = '2020/2021';
+const year = '2019/2020';
 
 /**
  * Using axios to get html code, if succeeds uses cheerio to load html

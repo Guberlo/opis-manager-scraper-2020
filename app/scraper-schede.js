@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const { getElemInnerText, getElemAttribute, addslashes } = require('./utils');
+const { getElemInnerText, getElemAttribute, addslashes, year } = require('./utils');
 const { pool } = require('./db');
 
 const AGE_KEYS = ['18-19', '20-21', '22-23', '24-25', '26-27', '28-29', '30 e oltre'];
@@ -16,9 +16,6 @@ const GRAPH_TYPE = {
   freq: 'stud',
   anno: 'iscr',
 };
-
-const YEAR = '2020/2021';
-let i = 0;
 
 /**
  * Filter graph's link to return the number of answer per category (Ex. eta1=22...)
@@ -314,7 +311,7 @@ const insertScheda = async (schedeStats, grafici, questions, id_insegnamento) =>
                           questions.suggerimenti_f,
                           questions.suggerimenti_nf,
                           id_insegnamento,
-                          YEAR])
+                          year])
               .then(res => {
                 console.log('#### \t\t\t \033[34m\t' +  id_insegnamento +'\033[0m' + ' [' + schedeStats[0].numSchedeF + ']');
                 return res.insertId;
