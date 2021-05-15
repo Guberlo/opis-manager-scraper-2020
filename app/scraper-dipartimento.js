@@ -23,7 +23,7 @@ const extractDipStats = async (elem, $) => {
   let name = $(tds[0]); // Deparment's name
   let opisLink = ($(tds[7]).find('a')); // Department's opis link
 
-  name = getElemInnerText(name);
+  name = getElemInnerText(name).substr(16); // Remove 'Dipartimento Di ' from name
   opisLink = getElemAttribute('href')(opisLink);
   const unictId = parseID(getElemAttribute('href')(depLink));
 
