@@ -3,11 +3,10 @@ const {
   getElemInnerText, getElemAttribute, isTextEmpty, addslashes,
 } = require('./utils');
 const { pool } = require('./db');
-
-const year = '2020/2021';
+const { year } = require('./utils');
 
 /**
- * Takes a <tr> containing info about a taching as an argument.
+ * Takes a <tr> containing info about a teaching as an argument.
  * Returns a dict where all info are stored.
  * @param {*} elem
  */
@@ -22,14 +21,15 @@ const extractInsStats = async (elem, $) => {
     const insCodModulo = $(tds[4]);
     // const ins_modulo = $(tds[5]);
     const insAssegnazione = $(tds[6]);
-    const insSSD = $(tds[7]);
-    const insAnno = $(tds[8]);
-    const insSemestre = $(tds[9]);
-    const insCfu = $(tds[10]);
-    const insDocente = $(tds[11]);
-    const s1 = $(tds[12]);
-    const s3 = $(tds[13]);
-    const linkOpis = $(tds[15]).find('a');
+    const insTipo = $(tds[7]);
+    const insSSD = $(tds[8]);
+    const insAnno = $(tds[9]);
+    const insSemestre = $(tds[10]);
+    const insCfu = $(tds[11]);
+    const insDocente = $(tds[12]);
+    const s1 = $(tds[13]);
+    const s3 = $(tds[14]);
+    const linkOpis = $(tds[16]).find('a');
 
     return {
       insID: getElemInnerText(insID),
@@ -38,6 +38,7 @@ const extractInsStats = async (elem, $) => {
       // ins_modulo: (_.isNull(getElemInnerText(ins_modulo)) ? '0' : getElemInnerText(insCanale)),
       insCodModulo: (_.isNull(getElemInnerText(insCodModulo)) ? '0' : getElemInnerText(insCodModulo)),
       insAssegnazione: getElemInnerText(insAssegnazione),
+      insTipo: getElemInnerText(insTipo) || 'no',
       insSSD: (_.isNull(getElemInnerText(insSSD)) ? 'no' : getElemInnerText(insSSD)),
       insAnno: getElemInnerText(insAnno),
       insSemestre: (_.isNull(getElemInnerText(insSemestre)) ? 'non previsto' : getElemInnerText(insSemestre)),
@@ -47,7 +48,6 @@ const extractInsStats = async (elem, $) => {
       s3: getElemInnerText(s3),
       linkOpis: (_.isNull(getElemAttribute('href')(linkOpis)) ? 'Scheda non autorizzata alla pubblicazione' : getElemAttribute('href')(linkOpis)),
     };
-    // Missing tipo
   }
   // If the <tr> is without some attributes (Ex. teaching with multiple professors, only one td will contain all informations, the others will contain just some different infos)
 
@@ -66,14 +66,15 @@ const extractInsStats = async (elem, $) => {
   const insCodModulo = $(prevTd[4]);
   // const ins_modulo = $(prevTd[5]);
   const insAssegnazione = $(tds[1]);
-  const insSSD = $(tds[2]);
-  const insAnno = $(tds[3]);
-  const insSemestre = $(tds[4]);
-  const insCfu = $(tds[5]);
-  const insDocente = $(tds[6]);
-  const s1 = $(prevTd[12]);
-  const s3 = $(prevTd[13]);
-  const linkOpis = $(prevTd[15]).find('a');
+  const insTipo = $(tds[2]);
+  const insSSD = $(tds[3]);
+  const insAnno = $(tds[4]);
+  const insSemestre = $(tds[5]);
+  const insCfu = $(tds[6]);
+  const insDocente = $(tds[7]);
+  const s1 = $(prevTd[13]);
+  const s3 = $(prevTd[14]);
+  const linkOpis = $(prevTd[16]).find('a');
   
   return {
     insID: getElemInnerText(insID),
@@ -82,6 +83,7 @@ const extractInsStats = async (elem, $) => {
     // ins_modulo: (_.isNull(getElemInnerText(ins_modulo)) ? '0' : getElemInnerText(insCanale)),
     insCodModulo: (_.isNull(getElemInnerText(insCodModulo)) ? '0' : getElemInnerText(insCodModulo)),
     insAssegnazione: getElemInnerText(insAssegnazione),
+    insTipo: getElemInnerText(insTipo) || 'no',
     insSSD: getElemInnerText(insSSD),
     insAnno: getElemInnerText(insAnno),
     insSemestre: (_.isNull(getElemInnerText(insSemestre)) ? 'non previsto' : getElemInnerText(insSemestre)),
@@ -94,13 +96,14 @@ const extractInsStats = async (elem, $) => {
 };
 
 const insertInsegnamento = async (obj, dbID) => {
-  const queryStr = 'INSERT INTO insegnamento (codice_gomp, nome, canale, id_modulo, ssd, anno, semestre, cfu, docente, assegn, id_cds, anno_accademico) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)';
+  const queryStr = 'INSERT INTO insegnamento (codice_gomp, nome, canale, id_modulo, tipo, ssd, anno, semestre, cfu, docente, assegn, id_cds, anno_accademico) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)';
 
   try {
     return pool.query(queryStr, [obj.insID,
                 addslashes(obj.insName),
                 addslashes(obj.insCanale),
                 obj.insCodModulo,
+                addslashes(obj.insTipo),
                 addslashes(obj.insSSD),
                 addslashes(obj.insAnno),
                 addslashes(obj.insSemestre),

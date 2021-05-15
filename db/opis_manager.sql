@@ -69,7 +69,7 @@ CREATE TABLE `insegnamento` (
   `canale` varchar(8) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'no',
   `id_modulo` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0',
   `nome_modulo` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `tipo` varchar(4) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tipo` varchar(25) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `ssd` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `assegn` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `id_cds` bigint(20) unsigned NOT NULL,
