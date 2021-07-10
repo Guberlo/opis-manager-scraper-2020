@@ -1,14 +1,13 @@
-const { result } = require('lodash');
 const mysql = require('mysql');
 const util = require('util');
-const { addslashes } = require('./utils');
+const { addslashes, year } = require('./utils');
 
-const year = '2020/2021';
-const { user, pass } = require('./config');
+const { user, pass, host } = require('./config');
 
 const config = {
-  user,
+  user: user,
   password: pass,
+  host: host,
   database: 'opis_manager',
   connectionLimit: 20,
   connectionTimeout: 10000,
