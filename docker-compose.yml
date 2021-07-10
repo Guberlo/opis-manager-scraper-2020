@@ -1,0 +1,14 @@
+version: "2"
+services:
+  node:
+    image: "node:14"
+    working_dir: /usr/opis-scraper/src/
+    volumes:
+      - ./:/usr/opis-scraper/src/
+    networks:
+      - opis
+    command: bash -c "npm run dev"
+
+networks:
+  opis:
+    external: true
