@@ -8,121 +8,121 @@ const _ = require('lodash');
 
 const depRequest = getHtmlFromUrl(url);
 
-// Test information for all tr
 async function depsAsync() {
-    const $ = await depRequest;
-  
+  const $ = await depRequest;
+
+  try {
+    // Process departments data
+    return Promise.all($(tableSelectorDip).map(async (i, el) => {
+      // Scrape data from departments
+      const obj = await extractDipStats($(el), $);
+
+      // Insert data into DB
+      return {
+        dbID: await insertDip(obj.unictId, year, obj.name),
+        depID: obj.unictId
+      }
+    }).toArray());
+  } catch (error) {
+    console.error(error);
+    return -1;
+  }
+}
+
+async function cdsAsync(depsArray) {
+  return Promise.all(depsArray.map(async dep => {
+    const cdsUrl = `${url}cds_dip.php?id=${dep.depID}&aa=2019`;
+    const $ = await getHtmlFromUrl(cdsUrl);
+
     try {
-      // Process departments data
-      return Promise.all($(tableSelectorDip).map(async (i, el) => {
-        // Scrape data from departments
-        const obj = await extractDipStats($(el), $);
-  
+      // Process cds data
+      return Promise.all($(tableSelectorCds).map(async (i, el) => {
+        // Scrape data from cds
+        const obj = await extractCdsStats($(el), $);
+
         // Insert data into DB
-        return {
-          dbID: await insertDip(obj.unictId, year, obj.name),
-          depID: obj.unictId
+        try {
+
+          // Push dbid to scrape insegnamenti
+          return {
+            dbID: await insertCds(obj.cdsID, year, obj.cdsName, obj.cdsClass, dep.dbID),
+            cdsID: obj.cdsID,
+            cdsUrlID: obj.cdsUrlID,
+            cdsClass: obj.cdsClass,
+          };
+        } catch (e) {
+          console.error(e);
         }
       }).toArray());
     } catch (error) {
       console.error(error);
       return -1;
     }
-  }
+  }));
+}
 
-  async function cdsAsync(depsArray) {
-    return Promise.all(depsArray.map(async dep => {
-      const cdsUrl = `${url}cds_dip.php?id=${dep.depID}&aa=2019`;
-    
-      const $ = await getHtmlFromUrl(cdsUrl);
-    
-      try {
-        // Process cds data
-        return Promise.all($(tableSelectorCds).map(async (i, el) => {
-          // Scrape data from cds
-          const obj = await extractCdsStats($(el), $);
-          // console.log(obj);
-    
-          // Insert data into DB
-          try {
-      
-            // Push dbid to scrape cds
-            return {
-              dbID:  await insertCds(obj.cdsID, year, obj.cdsName, obj.cdsClass, dep.dbID),
-              cdsID: obj.cdsID,
-              cdsClass: obj.cdsClass,
-            };
-          } catch(e) {
-            console.error(e);
-          }
-        }).toArray());
-      } catch (error) {
-        console.error(error);
-        return -1;
-      }
-    }));
-  }
+async function insAsync(cdsArray) {
+  return Promise.all(cdsArray.flat().map(async cds => {
 
-  async function insAsync(cdsArray) {
-    return Promise.all(cdsArray.map(async cdsMap => {
-      return Promise.all(cdsMap.map(async cds => {
-        const insUrl = `${url}insegn_cds.php?aa=2019&cds=${cds.cdsID}&classe=${cds.cdsClass}`;
-    
-      const $ = await getHtmlFromUrl(insUrl);
-    
-      try {
-        // Process departments data
-        return Promise.all($(tableSelectorIns).map(async (i, el) => {
-          // Scrape data from departments
-          const obj = await extractInsStats($(el), $);
-        
-          try {
-            // Push dbid to scrape cds
-            return {
-              dbID: await insertInsegnamento(obj, cds.dbID),
-              linkOpis: obj.linkOpis,
-            };
-          } catch(e) {
-            console.error(e);
-          }
-        }).toArray());
-      } catch (error) {
-        console.error(error);
-        return -1;
-      }
-      }))
-    }));
-      
-  }
+    const insUrl = `${url}insegn_cds.php?aa=2019&cds=${cds.cdsUrlID}&classe=${cds.cdsClass}`;
+    console.info(insUrl);
 
-  async function schedeAsync(insArray) {
-    for (const ins of insArray) {
-      if(_.isUndefined(ins.linkOpis) || ins.linkOpis === 'Scheda non autorizzata alla pubblicazione')
+    const $ = await getHtmlFromUrl(insUrl);
+
+    try {
+      // Process insegnamenti data
+      return Promise.all($(tableSelectorIns).map(async (i, el) => {
+        // Scrape data from insegnamenti
+        const obj = await extractInsStats($(el), $);
+
+        try {
+          // Push dbid to scrape schede
+          return {
+            dbID: await insertInsegnamento(obj, cds.dbID),
+            linkOpis: obj.linkOpis,
+          };
+        } catch (e) {
+          console.error(e);
+        }
+      }).toArray());
+    } catch (error) {
+      console.error(error);
+      return -1;
+    }
+  }));
+
+}
+
+async function schedeAsync(insArray) {
+  for (const ins of insArray) {
+    try {
+      if (_.isUndefined(ins.linkOpis) || ins.linkOpis === 'Scheda non autorizzata alla pubblicazione')
         console.log(ins);
 
       else {
         const $ = await getHtmlFromUrl(url + ins.linkOpis);
         const schedeStats = await extractSchedeStats($);
-        const grafici = extractFromGraphs($);
+        const grafici = await extractFromGraphs($);
         const questions = await extractFromTable($);
+
         await insertScheda(schedeStats, grafici, questions, ins.dbID);
- 
+
       }
+    } catch (e) {
+      console.error(e);
     }
   }
+}
 
-  (async () => {
-    let depsArray = await depsAsync();
-    
-    let cdsArray = await cdsAsync(depsArray);
+(async () => {
+  let depsArray = await depsAsync();
 
-    let insPromises = await insAsync(cdsArray);
+  let cdsArray = await cdsAsync(depsArray);
 
-    insPromises = [].concat.apply([], insPromises);
+  let insArray = await insAsync(cdsArray);
+  insArray = insArray.flat();
 
-    for (const insArray of insPromises) {
-      schedeAsync(insArray);
-    }
+  await schedeAsync(insArray);
 
-    // closeConnection(); THIS NEENDS TO HAPPEN ONLY AFTER THE END OF FOR ... OF
-  })();
+  closeConnection();
+})();
