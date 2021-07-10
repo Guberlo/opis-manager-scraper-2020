@@ -1,5 +1,6 @@
-const user = 'username'
-const pass = 'password'
+const host = 'databaseHost';
+const user = 'username';
+const pass = 'password';
 
 module.exports = {
     user,
