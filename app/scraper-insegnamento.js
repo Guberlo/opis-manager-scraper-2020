@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const {
-  getElemInnerText, getElemAttribute, isTextEmpty, addslashes,
+  getElemInnerText, getElemAttribute, addslashes,
 } = require('./utils');
 const { pool } = require('./db');
 const { year } = require('./utils');

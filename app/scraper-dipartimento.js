@@ -21,10 +21,10 @@ const extractDipStats = async (elem, $) => {
   const tds = $(elem).find('td');
   const depLink = ($(tds[0]).find('a')); // Department's link
   let name = $(tds[0]); // Deparment's name
-  let opisLink = ($(tds[7]).find('a')); // Department's opis link
-
+  // let opisLink = ($(tds[7]).find('a')); // Department's opis link NOT USED
+  // opisLink = getElemAttribute('href')(opisLink); NOT USED
+  
   name = getElemInnerText(name).substr(16); // Remove 'Dipartimento Di ' from name
-  opisLink = getElemAttribute('href')(opisLink);
   const unictId = parseID(getElemAttribute('href')(depLink));
 
   return {

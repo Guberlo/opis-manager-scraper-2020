@@ -1,8 +1,8 @@
-const _ = require('lodash');
 const {
   getElemInnerText, getElemAttribute, addslashes,
 } = require('./utils');
 const { pool } = require('./db');
+const cdsMap = require('../map');
 
 /**
  * Takes a <tr> containing info about a cds as an argument.
@@ -16,26 +16,27 @@ const extractCdsStats = async (elem, $) => {
   let cdsName = $(tds[1]);
   let cdsLink = $(tds[1]).find('a');
   let cdsClass = $(tds[2]);
-  let linkOpis = $(tds[8]).find('a');
+  // let linkOpis = $(tds[8]).find('a'); NOT USED
 
   cdsID = getElemInnerText(cdsID);
   cdsName = getElemInnerText(cdsName);
   cdsLink = getElemAttribute('href')(cdsLink);
   cdsClass = getElemInnerText(cdsClass);
-  linkOpis = getElemAttribute('href')(linkOpis);
+  // linkOpis = getElemAttribute('href')(linkOpis); NOT USED
 
   return {
-    cdsID: _.isNull(cdsID) ? '' : cdsID,
+    cdsUrlID: cdsID,
+    cdsID: mapCdsId(cdsID) || '',
     cdsName,
     cdsLink,
-    cdsClass: _.isNull(cdsClass) ? '' : cdsClass,
+    cdsClass: cdsClass || '',
   };
 };
 
 const insertCds = async (id, year, nome, classe, dbID) => {
   const queryStr = 'INSERT INTO corso_di_studi (unict_id, anno_accademico, nome, classe, id_dipartimento) VALUES (?,?,?,?,?)';
   try {
-    return pool.query(queryStr, [addslashes(id), year, addslashes(nome), classe, dbID])
+    return pool.query(queryStr, [id, year, addslashes(nome), classe, dbID])
         .then(res => {
           console.log('##\t \033[36m\t' +  nome +'\033[0m');
           return res.insertId;
@@ -44,6 +45,14 @@ const insertCds = async (id, year, nome, classe, dbID) => {
     console.error(error);
   }
 };
+
+const mapCdsId = (cdsID) => {
+  if (cdsMap.MAP[cdsID])
+    return cdsMap.MAP[cdsID];
+  return cdsID;
+};
+
+console.log(mapCdsId('X81'));
 
 module.exports = {
   extractCdsStats,
