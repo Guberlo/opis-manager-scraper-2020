@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const { getElemInnerText, getElemAttribute, addslashes, year } = require('./utils');
+const { getElemInnerText, getElemAttribute, year } = require('./utils');
 const { pool } = require('./db');
 
 const AGE_KEYS = ['18-19', '20-21', '22-23', '24-25', '26-27', '28-29', '30 e oltre'];
@@ -150,15 +150,13 @@ const extractFromQuestion = (elem, $) => {
   let questions = [];
 
   const tds = $(elem).find('td');
-  const decisamenteNo = getElemInnerText($(tds[1]));
-  const noCheSi = getElemInnerText($(tds[2]));
-  const siCheNo = getElemInnerText($(tds[3]));
-  const si = getElemInnerText($(tds[4]));
-  const nonSo = getElemInnerText($(tds[5]));
+  const decisamenteNo = getElemInnerText($(tds[1])) || '0';
+  const noCheSi = getElemInnerText($(tds[2])) || '0';
+  const siCheNo = getElemInnerText($(tds[3])) || '0';
+  const si = getElemInnerText($(tds[4])) || '0';
+  const nonSo = getElemInnerText($(tds[5])) || '0';
 
   questions.push(decisamenteNo, noCheSi, siCheNo, si, nonSo);
-
-  questions = questions.map((x) => (_.isNull(x) ? '0' : x));
 
   return JSON.stringify(questions);
 
@@ -183,6 +181,9 @@ const extractFromReason = (elem, $) => {
   // returns an array
 };
 
+// TODO: use Array.flat() when it is supported in all LTS platforms
+const flat = arr => [].concat(...arr);
+
 // <!----- REFACTOR THIS IS PURE SHIT -------!>
 /**
    * Extract data from tables and push it onto an array
@@ -198,11 +199,11 @@ const extractFromTable = async ($) => {
   const suggestions_nf = await getSuggestionsData($, 3);
   
   return{
-    domande: JSON.stringify(questions.splice(0,12)),
-    domande_nf: JSON.stringify(questions),
-    motivi: JSON.stringify(reasons),
-    suggerimenti_f: JSON.stringify(suggestions_f),
-    suggerimenti_nf: JSON.stringify(suggestions_nf),
+    domande_nf: (questions.splice(12).toString()),
+    domande: '[' + JSON.parse('[' + flat(questions) + ']') + ']',
+    motivi: reasons.toString(),
+    suggerimenti_f: suggestions_f.toString(),
+    suggerimenti_nf: suggestions_nf.toString(),
   }
 };
 // <!----- REFACTOR THIS IS PURE SHIT -------!>
@@ -281,7 +282,7 @@ const getGraphsSelector = ($) => {
   let array = []
   $('b').map( (i, el) => {
     if ($(el).text().indexOf('Riepilogo') > -1) {
-      graphs = ($(el).next().find('img'));
+      let graphs = ($(el).next().find('img'));
 
       graphs.map( (j,element) => {
         array.push(element);
