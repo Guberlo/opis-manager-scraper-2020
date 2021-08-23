@@ -65,7 +65,6 @@ async function insAsync(cdsArray) {
   return Promise.all(cdsArray.flat().map(async cds => {
 
     const insUrl = `${url}insegn_cds.php?aa=2019&cds=${cds.cdsUrlID}&classe=${cds.cdsClass}`;
-    console.info(insUrl);
 
     const $ = await getHtmlFromUrl(insUrl);
 

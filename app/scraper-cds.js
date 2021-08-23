@@ -52,8 +52,6 @@ const mapCdsId = (cdsID) => {
   return cdsID;
 };
 
-console.log(mapCdsId('X81'));
-
 module.exports = {
   extractCdsStats,
   insertCds,
