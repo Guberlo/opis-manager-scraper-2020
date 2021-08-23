@@ -31,22 +31,23 @@ const extractInsStats = async (elem, $) => {
     return {
       insID: getElemInnerText(insID),
       insName: getElemInnerText(insName),
-      insCanale: (_.isNull(getElemInnerText(insCanale)) ? 'no' : getElemInnerText(insCanale)),
+      insCanale: getElemInnerText(insCanale) || 'no',
       // ins_modulo: (_.isNull(getElemInnerText(ins_modulo)) ? '0' : getElemInnerText(insCanale)),
-      insCodModulo: (_.isNull(getElemInnerText(insCodModulo)) ? '0' : getElemInnerText(insCodModulo)),
+      insCodModulo: getElemInnerText(insCodModulo) || '0',
       insAssegnazione: getElemInnerText(insAssegnazione),
       insTipo: getElemInnerText(insTipo) || 'no',
-      insSSD: (_.isNull(getElemInnerText(insSSD)) ? 'no' : getElemInnerText(insSSD)),
+      insSSD: getElemInnerText(insSSD) || 'no',
       insAnno: getElemInnerText(insAnno),
-      insSemestre: (_.isNull(getElemInnerText(insSemestre)) ? 'non previsto' : getElemInnerText(insSemestre)),
+      insSemestre: getElemInnerText(insSemestre) || 'non previsto',
       insCfu: getElemInnerText(insCfu),
-      insDocente: (_.isNull(getElemInnerText(insDocente)) ? 'non assegnato' : getElemInnerText(insDocente)),
+      insDocente: getElemInnerText(insDocente) || 'non assegnato',
       s1: getElemInnerText(s1),
       s3: getElemInnerText(s3),
-      linkOpis: (_.isNull(getElemAttribute('href')(linkOpis)) ? 'Scheda non autorizzata alla pubblicazione' : getElemAttribute('href')(linkOpis)),
+      linkOpis: getElemAttribute('href')(linkOpis) || 'Scheda non autorizzata alla pubblicazione',
     };
   }
-  // If the <tr> is without some attributes (Ex. teaching with multiple professors, only one td will contain all informations, the others will contain just some different infos)
+  // Some rows (the case in which many professors are assigned to that teaching) are half-filled, containing just some information leaving the rest blank (they are the same as the previous).
+  // Hence we look for the first fully-filled row before the one we are scraping, taking this information in order to save it to the database.
 
   const parent = $(tds).parent();
   let prevTd = $(parent).prev();
@@ -76,19 +77,19 @@ const extractInsStats = async (elem, $) => {
   return {
     insID: getElemInnerText(insID),
     insName: getElemInnerText(insName),
-    insCanale: (_.isNull(getElemInnerText(insCanale)) ? 'no' : getElemInnerText(insCanale)),
+    insCanale: getElemInnerText(insCanale) || 'no',
     // ins_modulo: (_.isNull(getElemInnerText(ins_modulo)) ? '0' : getElemInnerText(insCanale)),
-    insCodModulo: (_.isNull(getElemInnerText(insCodModulo)) ? '0' : getElemInnerText(insCodModulo)),
+    insCodModulo: getElemInnerText(insCodModulo) || '0',
     insAssegnazione: getElemInnerText(insAssegnazione),
     insTipo: getElemInnerText(insTipo) || 'no',
     insSSD: getElemInnerText(insSSD),
     insAnno: getElemInnerText(insAnno),
-    insSemestre: (_.isNull(getElemInnerText(insSemestre)) ? 'non previsto' : getElemInnerText(insSemestre)),
+    insSemestre: getElemInnerText(insSemestre) || 'non previsto',
     insCfu: getElemInnerText(insCfu),
-    insDocente: (_.isNull(getElemInnerText(insDocente)) ? 'non assegnato' : getElemInnerText(insDocente)),
+    insDocente: getElemInnerText(insDocente) || 'non assegnato',
     s1: getElemInnerText(s1),
     s3: getElemInnerText(s3),
-    linkOpis: (_.isNull(getElemAttribute('href')(linkOpis)) ? 'Scheda non autorizzata alla pubblicazione' : getElemAttribute('href')(linkOpis)),
+    linkOpis: getElemAttribute('href')(linkOpis) || 'Scheda non autorizzata alla pubblicazione',
   };
 };
 
@@ -100,16 +101,16 @@ const insertInsegnamento = async (obj, dbID) => {
       console.warn(JSON.stringify(obj), "is null");
       
     return pool.query(queryStr, [obj.insID,
-                addslashes(obj.insName),
-                addslashes(obj.insCanale),
+                obj.insName,
+                obj.insCanale,
                 obj.insCodModulo,
-                addslashes(obj.insTipo),
-                addslashes(obj.insSSD),
-                addslashes(obj.insAnno),
-                addslashes(obj.insSemestre),
-                addslashes(obj.insCfu),
-                addslashes(obj.insDocente),
-                addslashes(obj.insAssegnazione),
+                obj.insTipo,
+                obj.insSSD,
+                obj.insAnno,
+                obj.insSemestre,
+                obj.insCfu,
+                obj.insDocente,
+                obj.insAssegnazione,
                 dbID,
                 year]).then(res => {
                   console.log('### \t\t \033[35m\t' +  obj.insName +'\033[0m');

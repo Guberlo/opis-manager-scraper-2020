@@ -101,6 +101,48 @@ const extractFromSuggestion = (elem, $) => {
   return JSON.stringify(suggestions);
 };
 
+const extractAge = ($, graphsSelector) => {
+  const ageGraphSel = $(graphsSelector[0]);
+  const ageStats = getStatsFromSelector(ageGraphSel);
+  const ageDict = UrlToDictionary(AGE_KEYS, ageStats);
+  return ageDict;
+}
+
+const extractEnrollmentYear = ($, graphsSelector) => {
+  const enrollmentYearSel = $(graphsSelector[5]);
+  const enrollmentYearStats = getStatsFromSelector(enrollmentYearSel);
+  const enrollmentYearDict = UrlToDictionary(ENROLLMENT_YEAR_KEYS, enrollmentYearStats);
+  return enrollmentYearDict;
+}
+
+const extractAttendingStud = ($, graphsSelector) => {
+  const attendingStudSel = $(graphsSelector[4]);
+  const attendingStudStats = getStatsFromSelector(attendingStudSel);
+  const attendingStudDict = UrlToDictionary(ATTENDING_STUD_KEYS, attendingStudStats);
+  return attendingStudDict;
+}
+
+const extractTotalStudy = ($, graphsSelector) => {
+  const totalStudySel = $(graphsSelector[3]);
+  const totalStudyStats = getStatsFromSelector(totalStudySel);
+  const totalStudyDict = UrlToDictionary(TOTAL_STUDY_KEYS, totalStudyStats);
+  return totalStudyDict;
+}
+
+const extractMeanTravel = ($, graphsSelector) => {
+  const meanTravelSel = $(graphsSelector[2]);
+  const meanTravelStats = getStatsFromSelector(meanTravelSel);
+  const meanTravelDict = UrlToDictionary(TRAVEL_KEYS, meanTravelStats);
+  return meanTravelDict;
+}
+
+const extractStudy = ($, graphsSelector) => {
+  const studySel = $(graphsSelector[1]);
+  const studyStats = getStatsFromSelector(studySel);
+  const studyDict = UrlToDictionary(STUDY_KEYS, studyStats);
+  return studyDict;
+}
+
 /**
    * Extract data from each graph an push it onto an array containing dicts
    * @param {*} $
@@ -108,29 +150,17 @@ const extractFromSuggestion = (elem, $) => {
 const extractFromGraphs = async ($) => {
   const graphsSelector = getGraphsSelector($);
 
-  const ageGraphSel = $(graphsSelector[0]);
-  const ageStats = getStatsFromSelector(ageGraphSel);
-  const ageDict = UrlToDictionary(AGE_KEYS, ageStats);
+  const ageDict = extractAge($, graphsSelector);
 
-  const studySel = $(graphsSelector[1]);
-  const studyStats = getStatsFromSelector(studySel);
-  const studyDict = UrlToDictionary(STUDY_KEYS, studyStats);
+  const studyDict = extractStudy($, graphsSelector);
 
-  const meanTravelSel = $(graphsSelector[2]);
-  const meanTravelStats = getStatsFromSelector(meanTravelSel);
-  const meanTravelDict = UrlToDictionary(TRAVEL_KEYS, meanTravelStats);
+  const meanTravelDict = extractMeanTravel($, graphsSelector);
 
-  const totalStudySel = $(graphsSelector[3]);
-  const totalStudyStats = getStatsFromSelector(totalStudySel);
-  const totalStudyDict = UrlToDictionary(TOTAL_STUDY_KEYS, totalStudyStats);
+  const totalStudyDict = extractTotalStudy($, graphsSelector);
 
-  const attendingStudSel = $(graphsSelector[4]);
-  const attendingStudStats = getStatsFromSelector(attendingStudSel);
-  const attendingStudDict = UrlToDictionary(ATTENDING_STUD_KEYS, attendingStudStats);
+  const attendingStudDict = extractAttendingStud($, graphsSelector);
 
-  const enrollmentYearSel = $(graphsSelector[5]);
-  const enrollmentYearStats = getStatsFromSelector(enrollmentYearSel);
-  const enrollmentYearDict = UrlToDictionary(ENROLLMENT_YEAR_KEYS, enrollmentYearStats);
+  const enrollmentYearDict = extractEnrollmentYear($, graphsSelector);
 
   return {
     eta: JSON.stringify(ageDict),
@@ -145,6 +175,7 @@ const extractFromGraphs = async ($) => {
 /**
    * Extract data from <tr> containing questions and returns an array
    * @param {*} elem
+   * @returns array of questions
    */
 const extractFromQuestion = (elem, $) => {
   let questions = [];
@@ -159,13 +190,12 @@ const extractFromQuestion = (elem, $) => {
   questions.push(decisamenteNo, noCheSi, siCheNo, si, nonSo);
 
   return JSON.stringify(questions);
-
-  // returns an array
 };
 
 /**
-   * Extract from <tr> containing reasons an returns an array
+   * Extract from <tr> containing reasons
    * @param {*} elem
+   * @returns array of reasons
    */
 const extractFromReason = (elem, $) => {
   let reasons = [];
@@ -178,13 +208,12 @@ const extractFromReason = (elem, $) => {
   reasons = reasons.map((x) => (_.isNull(x) ? '0' : x));
 
   return JSON.stringify(reasons);
-  // returns an array
 };
 
 // TODO: use Array.flat() when it is supported in all LTS platforms
 const flat = arr => [].concat(...arr);
 
-// <!----- REFACTOR THIS IS PURE SHIT -------!>
+// <!----- NEED TO REFACTOR DOMANDE -------!>
 /**
    * Extract data from tables and push it onto an array
    * @param {*} $
@@ -206,7 +235,7 @@ const extractFromTable = async ($) => {
     suggerimenti_nf: suggestions_nf.toString(),
   }
 };
-// <!----- REFACTOR THIS IS PURE SHIT -------!>
+// <!----- NEED TO REFACTOR DOMANDE -------!>
 
 const getQuestionsData = ($) => {
   try {
@@ -331,3 +360,5 @@ module.exports = {
   extractSchedeStats,
   insertScheda
 };
+
+

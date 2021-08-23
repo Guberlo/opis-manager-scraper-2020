@@ -36,7 +36,7 @@ const extractCdsStats = async (elem, $) => {
 const insertCds = async (id, year, nome, classe, dbID) => {
   const queryStr = 'INSERT INTO corso_di_studi (unict_id, anno_accademico, nome, classe, id_dipartimento) VALUES (?,?,?,?,?)';
   try {
-    return pool.query(queryStr, [id, year, addslashes(nome), classe, dbID])
+    return pool.query(queryStr, [id, year, nome, classe, dbID])
         .then(res => {
           console.log('##\t \033[36m\t' +  nome +'\033[0m');
           return res.insertId;
@@ -46,6 +46,12 @@ const insertCds = async (id, year, nome, classe, dbID) => {
   }
 };
 
+/**
+ * Converts a new alphanumerical cds ID into the corrisponding (if exists) numerical ID.
+ * This is needed because the front-end needs the old cds ID in order to compare different years.
+ * @param {String} cdsID 
+ * @returns converted cds ID
+ */
 const mapCdsId = (cdsID) => {
   if (cdsMap.MAP[cdsID])
     return cdsMap.MAP[cdsID];

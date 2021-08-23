@@ -1,4 +1,4 @@
-const { getElemInnerText, getElemAttribute } = require('./utils');
+const { getElemInnerText, getElemAttribute, removeBrackets } = require('./utils');
 const { pool } = require('./db');
 
 /**
@@ -21,6 +21,7 @@ const extractDipStats = async (elem, $) => {
   const tds = $(elem).find('td');
   const depLink = ($(tds[0]).find('a')); // Department's link
   let name = $(tds[0]); // Deparment's name
+
   // let opisLink = ($(tds[7]).find('a')); // Department's opis link NOT USED
   // opisLink = getElemAttribute('href')(opisLink); NOT USED
   
@@ -28,8 +29,8 @@ const extractDipStats = async (elem, $) => {
   const unictId = parseID(getElemAttribute('href')(depLink));
 
   return {
-    name,
-    unictId,
+    name: removeBrackets(name),
+    unictId: unictId,
   };
 };
 
