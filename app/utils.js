@@ -17,13 +17,11 @@ const year = '2019/2020';
  * In order to work with CSS Selectors and jQuery.
  * @param {String} url
  */
-// eslint-disable-next-line no-return-await
 const getHtmlFromUrl = async (url) => await axios.get(url)
   .then((response) => cheerio.load(response.data))
   .catch((error) => {
     error.status = (error.response && error.response.status) || 500;
     console.warn(`URL: ${url}`);
-    //throw error;
   });
 
 
@@ -44,23 +42,19 @@ const isTextEmpty = (extractor) => (elem) => _.isNull(extractor(elem));
 
 const isSpace = (elem) => ( (elem.html()) == "&#xA0;" || (elem.html()) == "&nbsp;" || (elem.html()) == " " )
 
-/**
- * Formats the string to avoid problems with MYSQL
- * @param {*} string
- */
-const addslashes = (string) => string.replace(/\\/g, '\\\\')
-  .replace(/\u0008/g, '\\b')
-  .replace(/\t/g, '\\t')
-  .replace(/\n/g, '\\n')
-  .replace(/\f/g, '\\f')
-  .replace(/\r/g, '\\r')
-  .replace(/'/g, '\\\'')
-  .replace(/"/g, '\\"');
-
 const sleep = ms => {
   return new Promise(resolve => {
     setTimeout(resolve, ms);
   });
+}
+
+/**
+ * Removes brackets from scraped strings.
+ * @param {String} string 
+ * @returns parsed string without brackets
+ */
+const removeBrackets = string => {
+  return string.replace(/\s*\(.*?\)\s*/g, '');
 }
 
 module.exports = {
@@ -69,8 +63,8 @@ module.exports = {
   getElemAttribute,
   isTextEmpty,
   isSpace,
-  addslashes,
   sleep,
+  removeBrackets,
   tableSelectorCds,
   tableSelectorDip,
   tableSelectorIns,
