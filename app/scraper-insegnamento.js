@@ -1,9 +1,6 @@
 const _ = require('lodash');
-const {
-  getElemInnerText, getElemAttribute, addslashes,
-} = require('./utils');
+const { getElemInnerText, getElemAttribute, isSpace, addslashes, year} = require('./utils');
 const { pool } = require('./db');
-const { year } = require('./utils');
 
 /**
  * Takes a <tr> containing info about a teaching as an argument.
@@ -14,7 +11,7 @@ const extractInsStats = async (elem, $) => {
   // If the <tr> contains all the needed informations about teaching
   const tds = $(elem).find('td');
   
-  if ($(tds).html() !== "&#xA0;") {
+  if (!isSpace( $(tds) )) {
     const insID = $(tds[1]);
     const insName = $(tds[2]);
     const insCanale = $(tds[3]);
@@ -54,7 +51,7 @@ const extractInsStats = async (elem, $) => {
   const parent = $(tds).parent();
   let prevTd = $(parent).prev();
 
-  while (($(prevTd).find('td').html()) == "&#xA0;") {
+  while (isSpace( $(prevTd).find('td') )) {
     prevTd = $(prevTd).prev();
   }
 
@@ -99,6 +96,9 @@ const insertInsegnamento = async (obj, dbID) => {
   const queryStr = 'INSERT INTO insegnamento (codice_gomp, nome, canale, id_modulo, tipo, ssd, anno, semestre, cfu, docente, assegn, id_cds, anno_accademico) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)';
 
   try {
+    if (!obj.insAnno)
+      console.warn(JSON.stringify(obj), "is null");
+      
     return pool.query(queryStr, [obj.insID,
                 addslashes(obj.insName),
                 addslashes(obj.insCanale),

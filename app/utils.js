@@ -42,6 +42,8 @@ const getElemAttribute = (attribute) => (elem) => (elem.attr && elem.attr(attrib
 
 const isTextEmpty = (extractor) => (elem) => _.isNull(extractor(elem));
 
+const isSpace = (elem) => ( (elem.html()) == "&#xA0;" || (elem.html()) == "&nbsp;" || (elem.html()) == " " )
+
 /**
  * Formats the string to avoid problems with MYSQL
  * @param {*} string
@@ -66,6 +68,7 @@ module.exports = {
   getElemInnerText,
   getElemAttribute,
   isTextEmpty,
+  isSpace,
   addslashes,
   sleep,
   tableSelectorCds,
