@@ -5,10 +5,16 @@ services:
     working_dir: /usr/opis-scraper/src
     volumes:
       - ./:/usr/opis-scraper/src
-    networks:
-      - opis
     command: bash -c "npm run dev"
 
-networks:
-  opis:
-    external: true
+  db:
+    image: "mysql:5.7"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=opis_manager
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=user
+    volumes:
+      - ./data/:/var/lib/mysql
+    ports:
+      - "3306:3306"
