@@ -1,4 +1,4 @@
-const { getHtmlFromUrl, tableSelectorCds, tableSelectorIns, tableSelectorDip, url, year } = require('./app/utils');
+const { getHtmlFromUrl, getHtmlFromIndex, tableSelectorCds, tableSelectorIns, tableSelectorDip, url, year } = require('./app/utils');
 const { extractDipStats, insertDip } = require('./app/scraper-dipartimento');
 const { extractCdsStats, insertCds } = require('./app/scraper-cds');
 const { extractInsStats, insertInsegnamento } = require('./app/scraper-insegnamento');
@@ -6,7 +6,7 @@ const { extractFromGraphs, extractFromTable, extractSchedeStats, insertScheda } 
 const { closeConnection } = require('./app/db');
 const _ = require('lodash');
 
-const depRequest = getHtmlFromUrl(url);
+const depRequest = getHtmlFromIndex(url);
 
 async function depsAsync() {
   const $ = await depRequest;
@@ -31,7 +31,7 @@ async function depsAsync() {
 
 async function cdsAsync(depsArray) {
   return Promise.all(depsArray.map(async dep => {
-    const cdsUrl = `${url}cds_dip.php?id=${dep.depID}&aa=2019`;
+    const cdsUrl = `${url}cds_dip.php?id=${dep.depID}&aa=${year.substr(0, 4)}`;
     const $ = await getHtmlFromUrl(cdsUrl);
 
     try {
@@ -64,7 +64,7 @@ async function cdsAsync(depsArray) {
 async function insAsync(cdsArray) {
   return Promise.all(cdsArray.flat().map(async cds => {
 
-    const insUrl = `${url}insegn_cds.php?aa=2019&cds=${cds.cdsUrlID}&classe=${cds.cdsClass}`;
+    const insUrl = `${url}insegn_cds.php?aa=${year.substr(0, 4)}&cds=${cds.cdsUrlID}&classe=${cds.cdsClass}`;
 
     const $ = await getHtmlFromUrl(insUrl);
 

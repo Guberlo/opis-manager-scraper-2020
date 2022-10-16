@@ -10,7 +10,7 @@ const tableSelectorCds = '.col-lg-6 > table > tbody > tr:not(:first-child)';
 const tableSelectorIns = '.col-lg-6 > table > tbody > tr:not(:first-child)';
 
 const url = 'https://pqa.unict.it/opis/';
-const year = '2019/2020';
+const year = '2020/2021';
 
 /**
  * Using axios to get html code, if succeeds uses cheerio to load html
@@ -23,6 +23,17 @@ const getHtmlFromUrl = async (url) => await axios.get(url)
     error.status = (error.response && error.response.status) || 500;
     console.warn(`URL: ${url}`);
   });
+
+  /**
+ * Same as getHtmlFromUrl but used for the fetching of the index.php
+ * @param {String} url
+ */
+const getHtmlFromIndex = async (url) => await axios.get(url + '?aa_inizio=' + year.substr(0, 4))
+.then((response) => cheerio.load(response.data))
+.catch((error) => {
+  error.status = (error.response && error.response.status) || 500;
+  console.warn(`URL: ${url + '?aa_inizio=' + year.substr(0, 4)}`);
+});
 
 
 /**
@@ -59,6 +70,7 @@ const removeBrackets = string => {
 
 module.exports = {
   getHtmlFromUrl,
+  getHtmlFromIndex,
   getElemInnerText,
   getElemAttribute,
   isTextEmpty,
